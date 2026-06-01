@@ -1,0 +1,72 @@
+목표: 전투로그 역설계 + 게임 시스템을 아는 전문가(사용자)의 개입으로 해당 게임의 전투 시스템을 복제하여 해당 게임에 최적화된 시뮬레이터가 되는 전투로그 기반 범용 턴제 전투 시뮬레이터
+
+
+
+1. Turn       — 시간의 단위
+2. Participants — 행동 주체
+3. Actions    — 그들이 하는 일
+4. State      — 변하는 것
+5. Resolution — 언제 끝나는가
+목표 아키텍처 (3-Layer)
+┌─────────────────────────────────────────────┐
+│ Layer 3: Game Plugins (게임별 정의)         │
+│   ├── RPG Plugin (현재 구조)                │
+│   ├── TCG Plugin (카드 시스템)              │
+│   ├── SRPG Plugin (공간 시스템)             │
+│   └── ... 사용자가 추가 가능                 │
+├─────────────────────────────────────────────┤
+│ Layer 2: Pluggable Modules (선택적 시스템)  │
+│   ├── Resource System (HP/MP/카드/포인트)   │
+│   ├── Targeting System (스탯/공간/덱)       │
+│   ├── Action Registry (확장 가능 액션)      │
+│   ├── Win Condition (HP=0/턴제한/생존)      │
+│   └── Phase Sequence (게임별 흐름)          │
+├─────────────────────────────────────────────┤
+│ Layer 1: Universal Core (모든 턴제 공통)    │
+│   ├── Turn Manager                          │
+│   ├── Participant Registry                  │
+│   ├── Event Broadcaster                     │
+│   ├── State Container (임의 key-value)      │
+│   └── Combat Log Emitter                    │
+└─────────────────────────────────────────────┘
+1차/2차 가공이 어떻게 작동해야 하는가
+[1차 가공 — 시뮬레이터의 추측]
+로그 → 게임 타입 감지
+       ├── x/y 컬럼 있음 → "SRPG 플러그인 권장"
+       ├── deck/hand 컬럼 있음 → "TCG 플러그인 권장"
+       ├── element 컬럼 있음 → "속성 시스템 권장"
+       └── ATK/DEF 패턴 → "스탯 기반 RPG 권장"
+
+[2차 가공 — 개발자 보정]
+플러그인 조합 확정
+공식/규칙 입력 (현재처럼)
+↓
+범용 엔진이 조합된 플러그인으로 시뮬레이션
+현재 → 범용 마이그레이션 로드맵
+Phase 1 — Action Registry 분리 (가장 먼저)
+
+현재: ACTION_DISPATCH = {...} (모듈 상수)
+이후: ActionRegistry 클래스, 플러그인이 동적 등록
+가장 기초이자 모든 후속 작업의 토대.
+Phase 2 — Win Condition 추상화
+
+현재: if HP == 0
+이후: WinCondition 인터페이스, 게임별 구현
+Phase 3 — Resource System 일반화
+
+현재: current_health, max_health 하드코딩
+이후: resources = {"hp": ..., "mp": ..., "combo": ...} 임의 자원
+Phase 4 — Spatial Module (선택적 플러그인)
+
+좌표계, 거리 계산, 이동, 사거리, 시야
+Phase 5 — Deck Module (선택적 플러그인)
+
+카드 풀, 핸드, 드로우/디스카드, 셔플
+Phase 6 — Auto Game-Type Detection
+
+로그 컬럼 분석 → 어떤 플러그인 조합이 적합한지 추천
+Phase 7 — 각 플러그인별 Symbolic Regression
+
+RPG: 데미지 공식
+TCG: 카드 효과 패턴
+SRPG: 이동 비용 / 사거리 / 명중률
