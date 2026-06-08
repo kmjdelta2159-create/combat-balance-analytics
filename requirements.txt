@@ -6,3 +6,5 @@ scipy
 plotly
 streamlit-sortables
 gplearn
+openpyxl
+pyarrow

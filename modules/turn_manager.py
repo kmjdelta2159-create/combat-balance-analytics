@@ -11,6 +11,24 @@ Turn Manager — 턴 실행 모델 추상화.
 
 from modules.win_condition import WinCondition, HPDepletion
 from modules.resource import ResourceModule
+import inspect
+
+def _accepts_turn_arg(fn):
+    if fn is None:
+        return False
+    try:
+        params = list(inspect.signature(fn).parameters.values())
+    except (TypeError, ValueError):
+        return False
+    if any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in params):
+        return True
+    positional = [
+        p for p in params
+        if p.kind in (inspect.Parameter.POSITIONAL_ONLY,
+                      inspect.Parameter.POSITIONAL_OR_KEYWORD)
+    ]
+    return len(positional) >= 2
+
 
 
 class TurnExecutor:
@@ -91,7 +109,7 @@ class SequentialTurnManager(TurnManager):
                  speed_stat=None, broadcast_phase_event=None,
                  win_condition: WinCondition = None,
                  resource_module=None, on_active_faint=None, action_priority=None,
-                 on_switch_in=None):
+                 on_switch_in=None, trace_faint_incoming=None, on_round_start=None):
         """
         Args:
             action_registry: ActionRegistry 인스턴스
@@ -109,11 +127,17 @@ class SequentialTurnManager(TurnManager):
         self.resource_module = resource_module or ResourceModule()
         self._on_active_faint = on_active_faint
         self._action_priority = action_priority
+        self._action_priority_accepts_turn = _accepts_turn_arg(action_priority)
         self._on_switch_in = on_switch_in
+        self._trace_faint_incoming = trace_faint_incoming
+        self._trace_faint_used = set()
+        self._on_round_start = on_round_start
 
     def run(self, participants, max_turns, sim_metrics, build_ctx, add_log):
         turn = 1
         while turn <= max_turns:
+            if self._on_round_start is not None:
+                self._on_round_start(turn, participants)   # 라운드 시작 resync(트레이스 모드)
             participants.sort(
                 key=lambda x: (-x.get(self.speed_stat, 0) if self.speed_stat else 0, x['id'])
             )
@@ -124,7 +148,10 @@ class SequentialTurnManager(TurnManager):
             # 행동 우선도(예: 교체 티어)로 안정 재정렬 — 동순위는 속도순 유지.
             # action_priority 미설정 시 재정렬 없음 → 순수 속도순(회귀 0).
             if self._action_priority is not None:
-                acting_units.sort(key=lambda x: -self._action_priority(x))
+                if self._action_priority_accepts_turn:
+                    acting_units.sort(key=lambda x: -self._action_priority(x, turn))
+                else:
+                    acting_units.sort(key=lambda x: -self._action_priority(x))
             for active_char in acting_units:
                 # 라운드 중간에 교체로 빠진 유닛은 제외. on_field 미설정 시 True(현행 전원-동시).
                 if not active_char.get('on_field', True):
@@ -137,7 +164,13 @@ class SequentialTurnManager(TurnManager):
 
                 # ── 턴 실행 (TurnExecutor 위임) ──
                 self.turn_executor.execute(ctx, self.registry)
+
+                def _emit_turn_end(_ctx):
+                    if self.broadcast_phase_event:
+                        self.broadcast_phase_event("TURN_END", _ctx)
+
                 if ctx["battle_over"]:
+                    _emit_turn_end(ctx)
                     return "None", sim_metrics
 
                 # ── 액티브 사망 시 처리 (on_active_faint 규칙) ──
@@ -146,12 +179,12 @@ class SequentialTurnManager(TurnManager):
                 # ── 전투 종료 판정 (WinCondition 위임) ──
                 is_over, winner = self.win_condition.check(participants, turn)
                 if is_over:
+                    _emit_turn_end(ctx)
                     add_log(f"🏆 전투 종료! {turn}턴 만에 {winner} 진영이 승리했습니다!")
                     return winner, sim_metrics
 
                 # ── 턴 종료 이벤트 ──
-                if self.broadcast_phase_event:
-                    self.broadcast_phase_event("TURN_END", ctx)
+                _emit_turn_end(ctx)
 
             turn += 1
 
@@ -178,14 +211,39 @@ class SequentialTurnManager(TurnManager):
                  if not p.get('on_field') and self.resource_module.is_alive(p)),
                 key=lambda x: x.get('roster_idx', 0)
             )
-            for p in reserve[:len(dead_on_field)]:
-                p['on_field'] = True
-                add_log(f"🔁 {team} 예비 {p.get('id', '?')} "
-                        f"({p.get('name', '?')}) 등장!")
+            # incoming 결정: 죽은 유닛별로 트레이스 지정(outgoing→incoming) 우선, 없으면
+            # roster_idx 순 폴백(현행). trace_faint_incoming 미설정 시 전부 폴백 = 회귀 0.
+            _tfi = self._trace_faint_incoming
+            ri = 0
+            for dead in dead_on_field:
+                inc = None
+                if _tfi is not None:
+                    ent = next((e for e in _tfi
+                                if e.get('outgoing') == dead.get('id')
+                                and e.get('outgoing') not in self._trace_faint_used), None)
+                    if ent is not None:
+                        cand = next((q for q in members
+                                     if q.get('id') == ent.get('incoming')
+                                     and not q.get('on_field')
+                                     and self.resource_module.is_alive(q)), None)
+                        if cand is not None:
+                            self._trace_faint_used.add(ent['outgoing'])
+                            inc = cand
+                if inc is None:
+                    while ri < len(reserve) and reserve[ri].get('on_field'):
+                        ri += 1
+                    if ri < len(reserve):
+                        inc = reserve[ri]
+                        ri += 1
+                if inc is None:
+                    continue
+                inc['on_field'] = True
+                add_log(f"🔁 {team} 예비 {inc.get('id', '?')} "
+                        f"({inc.get('name', '?')}) 등장!")
                 # 진입 즉시 처리 (S7) — engine 콜백으로 진입 효과·이벤트 발화. 콜백 미전달 시
                 # 다음-턴 _act_on_switch fallback을 위해 just_switched_in을 세팅(회귀 0).
                 if self._on_switch_in is not None:
-                    p['just_switched_in'] = False
-                    self._on_switch_in(p, participants, add_log)
+                    inc['just_switched_in'] = False
+                    self._on_switch_in(inc, participants, add_log)
                 else:
-                    p['just_switched_in'] = True
+                    inc['just_switched_in'] = True

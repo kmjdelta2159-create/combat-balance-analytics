@@ -43,6 +43,16 @@ class StochasticityModule:
         """
         return True
 
+    def roll_chance(self, p: float, ctx=None) -> bool:
+        """범용 확률 판정 — p 확률로 True. 시드 제어되는 self.rng 사용(재현성).
+        마비/혼란 등 행동 게이팅 판정에 쓴다. NoVariance(기본 결정론)도 상속하므로
+        시드 고정 시 재현 가능."""
+        return self.rng.random() < float(p)
+
+    def roll_range(self, lo: int, hi: int, ctx=None) -> int:
+        """범용 정수 균등 추출 — [lo,hi] 닫힌구간. 시드 제어 self.rng(재현). 다중 hit 횟수 등."""
+        return self.rng.randint(int(lo), int(hi))
+
     def shuffle_tie_order(self, participants_with_same_speed: list) -> list:
         """
         같은 속도 캐릭터들의 행동 순서 결정.

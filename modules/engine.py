@@ -225,6 +225,10 @@ def _broadcast_phase_event(phase_key, ctx, targets=None):
     - actor (active_char): 항상 알림
     - targets: 제공 시 각 타겟에도 알림
     """
+    phase_cb = ctx.get("on_phase_event") if ctx else None
+    if phase_cb is not None:
+        phase_cb(phase_key, ctx, targets)
+        
     event = _PHASE_TO_EVENT.get(phase_key)
     if not event:
         return
@@ -322,6 +326,25 @@ def _maybe_voluntary_switch(ctx):
     시 교체). 미설정/조건 미충족/예비 없음 시 False → 회귀 0."""
     char = ctx["active_char"]
     gc = ctx.get("game_config") or {}
+    # ── 트레이스 구동: trace_actions 있으면 로그가 교체를 지시(hp_threshold 정책 대체) ──
+    _ta = gc.get("trace_actions")
+    if _ta is not None:
+        _sw = (_ta.get("switch") or {}).get((ctx.get("turn"), char.get("id")))
+        if not _sw:
+            return False
+        participants = ctx["participants"]
+        incoming = next((p for p in participants if p.get("id") == _sw), None)
+        if incoming is None or get_current(incoming) <= 0:
+            return False
+        char['on_field'] = False
+        incoming['on_field'] = True
+        ctx["add_log"](
+            f"[Turn {ctx['turn']}] {char.get('id','?')} 교체(트레이스) → "
+            f"{incoming.get('id','?')} ({incoming.get('name','?')}) 진입"
+        )
+        incoming['just_switched_in'] = False
+        _fire_switch_in(incoming, participants, gc, ctx["add_log"], ctx.get("field_state"))
+        return True
     pol = gc.get("switch_policy")
     if not pol:
         return False
@@ -399,6 +422,24 @@ def _act_target_select(ctx):
     # ── 자발적 교체 정책 (선택) — 조건 만족 시 교체로 턴 소모, 이번 턴 공격 생략 ──
     if _maybe_voluntary_switch(ctx):
         ctx["targets"] = []
+        return
+
+    # ── 트레이스 구동: 로그가 이번 턴 이 유닛의 무브·타겟을 지시 ──
+    _ta = (ctx.get("game_config") or {}).get("trace_actions")
+    if _ta is not None:
+        _ma = (_ta.get("move") or {}).get((ctx.get("turn"), char.get("id")))
+        if not _ma:
+            ctx["targets"] = []          # 로그상 행동 없음(기절/이미 교체) → 생략
+            return
+        _tid = _ma.get("target")
+        _tgt = next((p for p in participants if p.get("id") == _tid), None)
+        ctx["targets"] = [_tgt] if _tgt is not None else []
+        ctx["_trace_move"] = _ma.get("move")
+        ctx["add_log"](
+            f"[Turn {ctx['turn']}] {char['id']} ({char['name']}) "
+            f"[Phase: TARGET_SELECT] 트레이스 무브 {_ma['move'].get('name')} "
+            f"→ {_tid}"
+        )
         return
 
     # 타겟 후보: 상대 팀의 on_field(액티브) 유닛만. 예비(reserve)는 제외.
@@ -517,7 +558,11 @@ def _select_move_pure(char, target, sys_stats, game_config, formula_str):
 def _act_move_select(ctx):
     """무브 선택 Phase (Phase 8a) — movepool에서 그리디(기대 데미지 최대)로 무브 선택.
     movepool 미보유 시 current_move=None → 단일 global 공식 경로 유지(default=identity).
-    선택 본체는 공유 순수 코어 _select_move_pure(행동순서 예측기와 동일 경로)에 위임한다."""
+    선택 본체는 공유 순수 코어 _select_move_pure(행동순서 예측기와 동일 경로)에 위임한다.
+    트레이스 구동 시 target_select가 심어둔 로그 무브를 그대로 사용(계산 우회)."""
+    if ctx.get("_trace_move") is not None:
+        ctx["current_move"] = ctx["_trace_move"]
+        return
     ctx["current_move"] = _select_move_pure(
         ctx["active_char"], ctx.get("current_target"),
         ctx.get("sys_stats"), ctx.get("game_config"), ctx.get("formula_str"))
@@ -564,8 +609,23 @@ def _act_damage_calc(ctx):
     formula_eval = str(formula_str).lower() if formula_str else "0"
 
     import math
-    ctx["raw_dmg"] = max(0, int(float(eval(formula_eval, {"__builtins__": None, "math": math}, eval_env))))
+    try:
+        ctx["raw_dmg"] = max(0, int(float(eval(formula_eval, {"__builtins__": None, "math": math, "min": min, "max": max}, eval_env))))
+    except Exception as e:
+        ctx["raw_dmg"] = 0
     ctx["dmg"] = ctx["raw_dmg"]
+
+    # ── fixed_damage 무브 (Seismic Toss/Night Shade 류) — 레벨/상수 고정, 산식·스탯 무관 ──
+    _fd = (_move or {}).get("fixed_damage")
+    if _fd is not None:
+        ctx["raw_dmg"] = ctx["dmg"] = int(_fd)
+        ctx["fixed_damage"] = True
+    
+    if (ctx.get("game_config") or {}).get("dmg_debug"):
+        ctx["_dbg"] = {
+            "off": eval_env_raw.get("offense"), "def": eval_env_raw.get("defense"),
+            "pow": eval_env_raw.get("move_power"), "raw": ctx["raw_dmg"],
+        }
 
     # ── Stochasticity: 명중 판정 ──
     stoch = ctx.get("stochasticity")
@@ -577,7 +637,8 @@ def _act_damage_calc(ctx):
             return
         
         # ── Stochasticity: 데미지 분산 ──
-        ctx["dmg"] = int(stoch.apply_damage_variance(ctx["dmg"], ctx))
+        if not ctx.get("fixed_damage"):
+            ctx["dmg"] = int(stoch.apply_damage_variance(ctx["dmg"], ctx))
 
     _broadcast_phase_event("DAMAGE_CALC", ctx, targets=t)
 
@@ -634,7 +695,12 @@ def _act_element_mult(ctx):
         elem_mult = get_element_multiplier(atk_elem, def_elem)
 
     ctx["elem_mult"] = elem_mult
-    ctx["dmg"] = int(ctx["dmg"] * elem_mult)
+    if ctx.get("fixed_damage"):
+        # 고정 데미지: 효과 배율(2x/0.5x)·STAB 무시, 단 면역(×0)은 존중
+        if elem_mult == 0:
+            ctx["dmg"] = 0
+    else:
+        ctx["dmg"] = int(ctx["dmg"] * elem_mult)
     _broadcast_phase_event("ELEMENT_MULT", ctx, targets=t)
 
 def _act_crit_calc(ctx):
@@ -658,12 +724,46 @@ def _act_apply_damage(ctx):
     elem_mult = ctx.get("elem_mult", 1.0)
     elem_text = f" (상성 {elem_mult}x 적용)" if elem_mult != 1.0 else ""
 
+    target_resources = t.get("resources") or {}
+    resources_before = {
+        str(name): float((res or {}).get("current", 0.0) or 0.0)
+        for name, res in target_resources.items()
+    }
+    hp_before = float(get_current(t))
+
     resource_module = ctx.get("resource_module")
     if resource_module is not None:
         absorbed = resource_module.route_damage(t, dmg, ctx.get("damage_type"))
     else:
         apply_delta(t, -dmg)
         absorbed = 0
+        
+    hp_after = float(get_current(t))
+    hp_delta = max(0.0, hp_before - hp_after)
+
+    resources_after = {
+        str(name): float((res or {}).get("current", 0.0) or 0.0)
+        for name, res in (t.get("resources") or {}).items()
+    }
+    resource_deltas = {}
+    for name, before in resources_before.items():
+        after = resources_after.get(name, 0.0)
+        loss = max(0.0, before - after)
+        if loss > 0:
+            resource_deltas[name] = loss
+
+    ctx["damage_result"] = {
+        "damage": float(dmg),
+        "attempted_damage": float(dmg),
+        "absorbed": float(absorbed or 0),
+        "hp_before": hp_before,
+        "hp_after": hp_after,
+        "hp_delta": hp_delta,
+        "resources_before": resources_before,
+        "resources_after": resources_after,
+        "resource_deltas": resource_deltas,
+    }
+
     shield_text = f" (실드 {int(absorbed)} 흡수)" if absorbed else ""
 
     if "sim_metrics" in ctx:
@@ -677,6 +777,26 @@ def _act_apply_damage(ctx):
         f"  -> [Phase: APPLY_DAMAGE] {dmg}의 피해를 입혔습니다!{elem_text}{shield_text} "
         f"{t['id']} 잔여 체력: {get_current(t)}/{get_max(t)}"
     )
+    if (ctx.get("game_config") or {}).get("dmg_debug"):
+        d = ctx.get("_dbg", {})
+        print(f"[DMGDBG] T{ctx.get('turn')} {ctx.get('active_char',{}).get('id','?')}"
+              f"→{t.get('id','?')} {(ctx.get('current_move') or {}).get('name','?')}: "
+              f"pow={d.get('pow')} off={d.get('off')} def={d.get('def')} raw={d.get('raw')} "
+              f"elem={ctx.get('elem_mult')} final={dmg} "
+              f"maxhp={get_max(t)} hp후={get_current(t)}")
+              
+    # ── 반동무브: 사용자가 입힌 데미지의 분수만큼 자기 피해(PR-F3r) ──
+    move = ctx.get("current_move") or {}
+    _rec = move.get("recoil")
+    if _rec and dmg > 0:
+        char = ctx.get("active_char")
+        if char is not None and get_current(char) > 0:
+            recoil_dmg = max(1, int(dmg * _rec))
+            before = get_current(char)
+            apply_delta(char, -recoil_dmg)
+            ctx["add_log"](f"  -> [Phase: APPLY_DAMAGE] {char.get('id','?')} "
+                           f"반동 데미지 {before - get_current(char)} (recoil)")
+
     _broadcast_phase_event("APPLY_DAMAGE", ctx, targets=t)
 
 def _act_on_hit(ctx):
@@ -702,6 +822,131 @@ def _act_on_hit(ctx):
             "add_attacker_state": lambda s: _track_state(ctx, char, s),
         })
     _broadcast_phase_event("ON_HIT", ctx, targets=t)
+    _act_effect_dispatch(ctx, "ON_HIT")
+
+
+def _eff_get_res(char):
+    """vital 자원 dict 반환. 없으면 None."""
+    return (char.get("resources") or {}).get("HP")
+
+
+def _eff_scope(ctx, scope):
+    """효과 적용 대상. self/attacker=active_char, target=current_target."""
+    if scope == "target":
+        return ctx.get("current_target")
+    return ctx.get("active_char")
+
+
+def _eff_types_of(char):
+    """소유자 타입 리스트(t1/t2/t3). 조건 of_types/not_types용."""
+    g = (char or {}).get("gimmicks", {})
+    return [g.get(k) for k in ("t1", "t2", "t3") if g.get(k)]
+
+
+def _eff_cond_ok(ctx, cond, owner=None):
+    """효과 조건 평가. contact(접촉 무브)·of_types/not_types(소유자 타입). 미설정이면 통과."""
+    if not cond:
+        return True
+    if cond.get("contact") and not (ctx.get("current_move") or {}).get("contact"):
+        return False
+    w = cond.get("weather")
+    if w and str((ctx.get("field_state") or {}).get("weather") or "") != w:
+        return False
+    ot = cond.get("of_types")
+    if ot and not (set(ot) & set(_eff_types_of(owner))):
+        return False
+    nt = cond.get("not_types")
+    if nt and (set(nt) & set(_eff_types_of(owner))):
+        return False
+    na = cond.get("not_ability")
+    if na and (owner or {}).get("ability") in na:
+        return False   # Poison Heal 등 — 해당 특성 보유자에겐 미발동(맹독/독 데미지 억제)
+    os_ = cond.get("of_status")
+    if os_ and (owner or {}).get("status") not in os_:
+        return False
+    return True
+
+
+def _eff_swap_item(ctx, add_log):
+    """Trick류 — active_char와 current_target의 item을 교환하고, item_stat_mults
+    (game_config)의 정적 스탯배율을 각 측에서 old item ÷, new item × 로 보정. HP/scope 무관."""
+    a = ctx.get("active_char")
+    t = ctx.get("current_target")
+    if not a or not t:
+        return
+    mults = ((ctx.get("game_config") or {}).get("item_stat_mults")) or {}
+    ia, it = a.get("item"), t.get("item")
+
+    def _adj(ch, old_item, new_item):
+        for itm, op in ((old_item, "div"), (new_item, "mul")):
+            for st, mult in (mults.get(itm) or {}).items():
+                if st in ch and mult:
+                    ch[st] = int(ch[st] / mult) if op == "div" else int(ch[st] * mult)
+
+    _adj(a, ia, it)
+    _adj(t, it, ia)
+    a["item"], t["item"] = it, ia
+    add_log(f"  -> [Phase: ON_HIT] Trick: {a.get('id','?')}({it}) <-> {t.get('id','?')}({ia}) 도구 교환")
+
+
+def _act_effect_dispatch(ctx, phase):
+    """효과-스키마 디스패처 — game_config['mechanisms']['effects']에서 trigger==phase인
+    효과 중, 관련 캐릭터(피격자/자신)의 ability/item에 해당하는 것을 조건·스코프대로 적용.
+    effects 미설정 또는 캐릭터에 ability/item 없으면 no-op(회귀 0). 기존 status_tick/
+    leftovers/action_gate는 무관(별도). 첫 효과타입: damage_frac(maxHP 분수 데미지)."""
+    gc = ctx.get("game_config") or {}
+    effects = ((gc.get("mechanisms") or {}).get("effects")) or {}
+    if not effects:
+        return
+    add_log = ctx.get("add_log") or (lambda *a, **k: None)
+    # 페이즈별 owner — ON_HIT은 피격자+공격자, 그 외(ON_TURN_END 등)는 active_char만
+    # (턴엔드에 current_target가 남아 상대 효과가 이중 발동하는 것을 차단).
+    owners = ((ctx.get("current_target"), ctx.get("active_char"))
+              if phase == "ON_HIT" else (ctx.get("active_char"),))
+    for owner in owners:
+        if owner is None:
+            continue
+        keys = [owner.get("ability"), owner.get("item"), owner.get("status")]
+        if phase != "ON_HIT":   # 턴엔드 self엔 발효 날씨 토큰도 키로(sandstorm 등 날씨 소스)
+            keys.append((ctx.get("field_state") or {}).get("weather"))
+        if phase in ("ON_HIT", "ON_MOVE_USE") and owner is ctx.get("active_char"):   # 무브-소스: 사용자가 쓴 무브명
+            keys.append((ctx.get("current_move") or {}).get("name"))
+        for nm in keys:
+            spec = effects.get(nm) if nm else None
+            if not spec or spec.get("trigger") != phase:
+                continue
+            if spec.get("source") == "move" and nm != (ctx.get("current_move") or {}).get("name"):
+                continue   # move-소스는 실제 사용 무브에만(ability/item 동명 오발동 차단)
+            if not _eff_cond_ok(ctx, spec.get("condition"), owner):
+                continue
+            if (spec.get("effect") or {}).get("type") == "swap_item":
+                _eff_swap_item(ctx, add_log)   # Trick류 — 양자 아이템 교환(+스탯배율), res/scope 무관
+                continue
+            tgt = _eff_scope(ctx, spec.get("scope", "self"))
+            res = _eff_get_res(tgt) if tgt else None
+            if not res or res.get("current", 0) <= 0:
+                continue
+            eff = spec.get("effect") or {}
+            if eff.get("type") == "damage_frac":
+                frac = float(eff.get("frac", 0))
+                if eff.get("progressive"):       # 맹독 누진 — 누적 stage × frac (n/16)
+                    tgt["tox_stage"] = tgt.get("tox_stage", 0) + 1
+                    frac *= tgt["tox_stage"]
+                amt = int(res["max"] * frac)
+                if amt > 0:
+                    res["current"] = max(0, res["current"] - amt)
+                    add_log(f"  -> [Phase: {phase}] {nm}: {tgt.get('id','?')} -{amt} "
+                            f"({int(res['current'])}/{int(res['max'])})")
+            elif eff.get("type") == "heal_frac":
+                amt = int(res["max"] * float(eff.get("frac", 0)))
+                if amt > 0:
+                    res["current"] = min(res["max"], res["current"] + amt)
+                    add_log(f"  -> [Phase: {phase}] {nm}: {tgt.get('id','?')} +{amt} "
+                            f"({int(res['current'])}/{int(res['max'])})")
+            elif eff.get("type") == "self_faint":
+                res["current"] = 0       # Explosion/Self-Destruct 사용자 자폭(HP→0)
+                add_log(f"  -> [Phase: {phase}] {nm}: {tgt.get('id','?')} 자폭(HP→0)")
+
 
 def _act_death_check(ctx):
     """사망 판정 + ON_DEATH 이벤트 브로드캐스트"""
@@ -716,7 +961,10 @@ def _act_death_check(ctx):
 def _act_turn_end_heal(ctx):
     """턴 종료 회복 메커니즘 (Leftovers류) — game_config['mechanisms']['leftovers'] 기반.
     부착 캐릭터가 턴 종료 시 vital 자원의 percent만큼 회복한다. 사망(현재값 0)이면
-    회복하지 않는다. max 상한으로 클램프. 미부착/미설정 시 no-op."""
+    회복하지 않는다. max 상한으로 클램프. 미부착/미설정 시 no-op.
+    + 효과-스키마 디스패처(ON_TURN_END)를 맨 앞에서 구동(PR-E′2) — effects 미설정 시 no-op.
+    단발 leftovers와 병존(둘 다 미설정이면 완전 no-op = 회귀0)."""
+    _act_effect_dispatch(ctx, "ON_TURN_END")
     char = ctx["active_char"]
     mechs = (ctx.get("game_config") or {}).get("mechanisms") or {}
     spec = mechs.get("leftovers")
@@ -742,6 +990,67 @@ def _act_turn_end_heal(ctx):
             f"  -> [Phase: ON_TURN_END] {char.get('id','?')} {rname} {int(gained)} 회복 "
             f"({int(res['current'])}/{int(res['max'])})"
         )
+
+
+def _hazard_entry_pct(char, hz, game_config):
+    """hz가 숫자=구버전 평탄. dict{'sr','spikes'}=구조형: SR(0.125×Rock타입곱)+Spikes(층/접지).
+    Magic Guard는 모든 간접 데미지 면역 → 진입 해저드 0(우박 칩 면제와 동형, L173-175)."""
+    if not isinstance(hz, dict):
+        return float(hz or 0)
+    if char.get("ability") == "Magic Guard":      # ← 추가: 진입 해저드 면역
+        return 0.0
+    g = char.get("gimmicks") or {}
+    types = [t for t in (g.get("t1"), g.get("t2")) if t]
+    tt = (game_config or {}).get("type_table") or {}
+    pct = 0.0
+    if hz.get("sr"):
+        rock = tt.get("Rock", {}); m = 1.0
+        for t in types: m *= float(rock.get(t, 1.0))
+        pct += 0.125 * m
+    sp = int(hz.get("spikes", 0) or 0)
+    if sp and ("Flying" not in types) and char.get("ability") != "Levitate":
+        pct += {1: 1/8, 2: 1/6, 3: 1/4}.get(sp, 1/4)
+    return pct
+
+
+def _apply_entry_hazard(char, participants, game_config, add_log, field_state=None):
+    """교체 시 진입 해저드 처리. game_config['mechanisms']['hazard'] 또는 필드 상태(team)를
+    합산해 해당하는 진영 캐릭터에게 max의 percent만큼 피해를 입힌다. 잔여 체력이
+    get_current/get_max/apply_delta만 쓰므로 ctx·resource_module 없는 _fire_switch_in
+    컨텍스트에서도 호환. spec 미설정/team 불일치/잔여 체력 0 이하면 no-op이므로 회귀 0. _fire_switch_in이
+    교체 시에만 호출하므로 초기 진입(첫 턴 시작)엔 피해를 주지 않음(Pokemon 본가 룰).
+    spec 예시: {"team": "Enemy", "percent": 0.125}. team="both"(양쪽 진영)도 지원."""
+    my_team = str(char.get("team"))
+    # 정적 설정(game_config) — team 매칭 시 percent.
+    static_pct = 0.0
+    mechs = (game_config or {}).get("mechanisms") or {}
+    spec = mechs.get("hazard")
+    if spec:
+        team = spec.get("team")
+        if (not team) or str(team).lower() == "both" or str(team) == my_team:
+            static_pct = float(spec.get("percent", 0.125))
+    # 동적 설정(field_state.hazard) — 자기 팀과 매치되는 피해. "both" 또는 내 팀 키.
+    dyn_pct = 0.0
+    fhaz = (field_state or {}).get("hazard") or {}
+    if fhaz:
+        dyn_pct = max(_hazard_entry_pct(char, fhaz.get("both", 0), game_config),
+                      _hazard_entry_pct(char, fhaz.get(my_team, 0), game_config))
+    # 합성: 이중과세 방지로 큰 값(사용자 결정).
+    percent = max(static_pct, dyn_pct)
+    if percent <= 0:
+        return
+    before = get_current(char)
+    if before <= 0:
+        return
+    mx = get_max(char)
+    if mx <= 0:
+        return
+    apply_delta(char, -mx * percent)          # apply_delta는 새 current를 반환하므로 차분으로 계산
+    lost = before - get_current(char)
+    if lost > 0:
+        add_log(f"  -> [Phase: ON_SWITCH] {char.get('id','?')} 진입 데미지 {int(lost)} (Hazard)")
+    if get_current(char) <= 0:
+        add_log(f"  [Phase: ON_SWITCH] ☠️ {char.get('id','?')} 진입 데미지로 쓰러짐! (Hazard)")
 
 
 def _act_status_tick(ctx):
@@ -785,21 +1094,21 @@ def _act_move_use(ctx):
     move = ctx.get("current_move")
     mechs = (ctx.get("game_config") or {}).get("mechanisms") or {}
     spec = mechs.get("protean")
-    if not spec or not move:
-        return
-    col = spec.get("gimmick_col")
-    want = str(spec.get("match_value", "")).strip().lower()
-    have = str(char.get("gimmicks", {}).get(col, "")).strip().lower() if col else ""
-    if not col or have != want:
-        return
-    mtype = move.get("type")
-    if not mtype:
-        return
-    if char.get("current_type") != mtype:
-        char["current_type"] = mtype
-        ctx["add_log"](
-            f"  -> [Phase: ON_MOVE_USE] {char.get('id','?')} 타입이 {mtype}(으)로 변경 (Protean)"
-        )
+    
+    # Protean 로직
+    if spec and move:
+        col = spec.get("gimmick_col")
+        want = str(spec.get("match_value", "")).strip().lower()
+        have = str(char.get("gimmicks", {}).get(col, "")).strip().lower() if col else ""
+        if col and have == want:
+            mtype = move.get("type")
+            if mtype and char.get("current_type") != mtype:
+                char["current_type"] = mtype
+                ctx["add_log"](
+                    f"  -> [Phase: ON_MOVE_USE] {char.get('id','?')} 타입이 {mtype}(으)로 변경 (Protean)"
+                )
+
+    _act_effect_dispatch(ctx, "ON_MOVE_USE")   # 무브-소스 효과(회복무브 등) — effects 미설정/미매칭 시 no-op
 
 
 def _act_move_effect(ctx):
@@ -890,44 +1199,7 @@ def _apply_switch_in_effects(char, participants, game_config, add_log):
                 f"{src_type}(으)로 복사됨 (Trace ← {opp.get('id','?')})")
 
 
-def _apply_entry_hazard(char, participants, game_config, add_log, field_state=None):
-    """교체 진입 정적 해저드 — game_config['mechanisms']['hazard'] 기반. 지정 진영(team)으로
-    교체 진입하는 유닛이 주 자원 max의 percent만큼 데미지를 받는다. 모듈 레벨
-    get_current/get_max/apply_delta만 쓰므로 ctx·resource_module 비의존 → _fire_switch_in
-    시그니처 불변. spec 미설정/team 불일치/자원 없음 시 no-op이라 회귀 0. _fire_switch_in은
-    교체 진입에서만 호출되므로 초기 리드(첫 액티브)는 자연히 면제(Pokemon 해저드와 동일).
-    spec 예: {"team": "Enemy", "percent": 0.125}. team="both"(대소문자 무시)면 진영 무관."""
-    my_team = str(char.get("team"))
-    # 정적 해저드(game_config) — team 매칭 시 percent.
-    static_pct = 0.0
-    mechs = (game_config or {}).get("mechanisms") or {}
-    spec = mechs.get("hazard")
-    if spec:
-        team = spec.get("team")
-        if (not team) or str(team).lower() == "both" or str(team) == my_team:
-            static_pct = float(spec.get("percent", 0.125))
-    # 동적 해저드(field_state.hazard) — 무브로 설치된 진영별 비율. "both" 또는 내 진영 키.
-    dyn_pct = 0.0
-    fhaz = (field_state or {}).get("hazard") or {}
-    if fhaz:
-        dyn_pct = max(float(fhaz.get("both", 0) or 0),
-                      float(fhaz.get(my_team, 0) or 0))
-    # 합성: 이중과세 방지로 큰 값(사용자 결정).
-    percent = max(static_pct, dyn_pct)
-    if percent <= 0:
-        return
-    before = get_current(char)
-    if before <= 0:
-        return
-    mx = get_max(char)
-    if mx <= 0:
-        return
-    apply_delta(char, -mx * percent)          # apply_delta는 새 current를 반환하므로 차분으로 계산
-    lost = before - get_current(char)
-    if lost > 0:
-        add_log(f"  -> [Phase: ON_SWITCH] {char.get('id','?')} 진입 데미지 {int(lost)} (Hazard)")
-    if get_current(char) <= 0:
-        add_log(f"  [Phase: ON_SWITCH] ☠️ {char.get('id','?')} 진입 데미지로 쓰러짐! (Hazard)")
+
 
 
 def _fire_switch_in(char, participants, game_config, add_log, field_state=None):
@@ -982,6 +1254,303 @@ def default_stochasticity_factory(seed):
     return DamageVariance(variance_pct=0.1, seed=seed)
 
 
+def _snapshot_for_worker(participants, hp_mode="absolute", resource_names=None, resource_mode="absolute"):
+    snap = {}
+    for p in participants:
+        pid = str(p.get("id"))
+        
+        hp_res = p.get("resources", {}).get("HP", {})
+        cur_hp = float(hp_res.get("current", 0.0))
+        if hp_mode == "percent":
+            max_hp = float(hp_res.get("max", 1.0))
+            if max_hp <= 0: max_hp = 1.0
+            hp_val = round((cur_hp / max_hp) * 100, 4)
+        else:
+            hp_val = round(cur_hp, 4)
+            
+        status_val = p.get("status")
+        if not status_val:
+            for st in p.get("active_states", []):
+                if st.get("gate_status") or st.get("status"):
+                    status_val = str(st.get("gate_status") or st.get("status"))
+                    break
+        
+        fainted_val = cur_hp <= 0
+        
+        snap[pid] = {
+            "hp": hp_val,
+            "status": str(status_val) if status_val else "",
+            "fainted": fainted_val
+        }
+        
+        extra_resources = {}
+        for rname in resource_names or []:
+            res = (p.get("resources") or {}).get(rname)
+            if not res:
+                continue
+            cur = float(res.get("current", 0.0) or 0.0)
+            if resource_mode == "percent":
+                mx = float(res.get("max", 1.0) or 1.0)
+                if mx <= 0:
+                    mx = 1.0
+                val = round((cur / mx) * 100.0, 4)
+            else:
+                val = round(cur, 4)
+            extra_resources[str(rname)] = val
+        if extra_resources:
+            snap[pid]["resources"] = extra_resources
+
+    return snap
+
+def _score_state_snapshots_for_worker(expected, actual, hp_tol=0.0, resource_tol=0.0):
+    checks = 0
+    mismatches = 0
+    hp_checks = 0
+    hp_mismatches = 0
+    status_checks = 0
+    status_mismatches = 0
+    faint_checks = 0
+    faint_mismatches = 0
+    resource_checks = 0
+    resource_mismatches = 0
+    missing = 0
+    first_mismatch = None
+    
+    for turn, exp_snap in expected.items():
+        act_snap = actual.get(turn, {})
+        for pid, exp_state in exp_snap.items():
+            if pid not in act_snap:
+                missing += 1
+                mismatches += 1
+                checks += 1
+                if not first_mismatch:
+                    first_mismatch = {"turn": turn, "id": pid, "kind": "missing"}
+                continue
+                
+            act_state = act_snap[pid]
+            
+            if "hp" in exp_state:
+                checks += 1
+                hp_checks += 1
+                if abs(exp_state["hp"] - act_state["hp"]) > hp_tol:
+                    mismatches += 1
+                    hp_mismatches += 1
+                    if not first_mismatch:
+                        first_mismatch = {"turn": turn, "id": pid, "kind": "hp", "expected": exp_state["hp"], "actual": act_state["hp"]}
+                        
+            if "status" in exp_state:
+                checks += 1
+                status_checks += 1
+                if exp_state["status"] != act_state["status"]:
+                    mismatches += 1
+                    status_mismatches += 1
+                    if not first_mismatch:
+                        first_mismatch = {"turn": turn, "id": pid, "kind": "status", "expected": exp_state["status"], "actual": act_state["status"]}
+                        
+            if "fainted" in exp_state:
+                checks += 1
+                faint_checks += 1
+                if bool(exp_state["fainted"]) != bool(act_state["fainted"]):
+                    mismatches += 1
+                    faint_mismatches += 1
+                    if not first_mismatch:
+                        first_mismatch = {"turn": turn, "id": pid, "kind": "fainted", "expected": exp_state["fainted"], "actual": act_state["fainted"]}
+                        
+            if "resources" in exp_state:
+                exp_res = exp_state["resources"]
+                act_res = act_state.get("resources") or {}
+                for rname, rval in exp_res.items():
+                    checks += 1
+                    resource_checks += 1
+                    if rname not in act_res or abs(rval - act_res[rname]) > resource_tol:
+                        mismatches += 1
+                        resource_mismatches += 1
+                        if not first_mismatch:
+                            first_mismatch = {
+                                "turn": turn, "id": pid, "kind": "resource", "resource": rname,
+                                "expected": rval, "actual": act_res.get(rname)
+                            }
+                        
+    accuracy = 1.0 - (mismatches / checks) if checks > 0 else 0.0
+    
+    return {
+        "turns": len(expected),
+        "checks": checks,
+        "mismatches": mismatches,
+        "accuracy": accuracy,
+        "hp_checks": hp_checks,
+        "hp_mismatches": hp_mismatches,
+        "status_checks": status_checks,
+        "status_mismatches": status_mismatches,
+        "faint_checks": faint_checks,
+        "faint_mismatches": faint_mismatches,
+        "resource_checks": resource_checks,
+        "resource_mismatches": resource_mismatches,
+        "missing": missing,
+        "first_mismatch": first_mismatch
+    }
+
+def _score_action_damage_for_worker(expected, actual, damage_tol=0.0, compare_field="damage"):
+    checks = 0
+    mismatches = 0
+    identity_mismatches = 0
+    damage_mismatches = 0
+    missing = 0
+    extra = 0
+    first_mismatch = None
+
+    for i in range(len(expected)):
+        exp = expected[i]
+        checks += 1
+        if i >= len(actual):
+            missing += 1
+            mismatches += 1
+            if not first_mismatch:
+                first_mismatch = {"turn": exp.get("turn"), "id": exp.get("actor"), "kind": "missing_action", "expected": exp, "actual": None}
+            continue
+
+        act = actual[i]
+        
+        # Identity checks
+        id_mismatch = False
+        if str(exp.get("turn")) != str(act.get("turn")) or str(exp.get("actor")) != str(act.get("actor")) or str(exp.get("target")) != str(act.get("target")):
+            id_mismatch = True
+            identity_mismatches += 1
+
+        # Damage check
+        dmg_mismatch = False
+        field = compare_field if compare_field in ("damage", "hp_delta") else "damage"
+        exp_val = float(exp.get(field, exp.get("damage", 0.0)) or 0.0)
+        act_val = float(act.get(field, act.get("damage", 0.0)) or 0.0)
+        if abs(exp_val - act_val) > damage_tol:
+            dmg_mismatch = True
+            damage_mismatches += 1
+
+        if id_mismatch or dmg_mismatch:
+            mismatches += 1
+            if not first_mismatch:
+                first_mismatch = {
+                    "turn": exp.get("turn"), "id": exp.get("actor"), 
+                    "kind": "action_damage", "field": field,
+                    "expected": exp_val, "actual": act_val,
+                    "expected_full": exp, "actual_full": act
+                }
+
+    if len(actual) > len(expected):
+        extra_count = len(actual) - len(expected)
+        extra += extra_count
+        checks += extra_count
+        mismatches += extra_count
+
+    accuracy = 1.0 - (mismatches / checks) if checks > 0 else 0.0
+
+    return {
+        "checks": checks,
+        "mismatches": mismatches,
+        "identity_mismatches": identity_mismatches,
+        "damage_mismatches": damage_mismatches,
+        "missing": missing,
+        "extra": extra,
+        "accuracy": accuracy,
+        "first_mismatch": first_mismatch
+    }
+
+def _score_action_resource_delta_for_worker(
+    expected, actual, delta_tol=0.0, resource_names=None, strict_extra=False
+):
+    checks = 0
+    mismatches = 0
+    identity_mismatches = 0
+    delta_mismatches = 0
+    missing = 0
+    extra = 0
+    first_mismatch = None
+
+    def _norm_key(e):
+        return (
+            int(e.get("turn") or 0),
+            str(e.get("actor") or ""),
+            str(e.get("target") or ""),
+            str(e.get("resource") or ""),
+        )
+
+    observed = {str(x) for x in (resource_names or [])}
+    actual_by_key = {}
+    for a in actual:
+        if observed and not strict_extra and str(a.get("resource") or "") not in observed:
+            continue
+        actual_by_key.setdefault(_norm_key(a), []).append(a)
+
+    for exp in expected:
+        checks += 1
+        key = _norm_key(exp)
+        bucket = actual_by_key.get(key) or []
+        if not bucket:
+            missing += 1
+            mismatches += 1
+            if not first_mismatch:
+                first_mismatch = {
+                    "turn": exp.get("turn"),
+                    "id": exp.get("actor"),
+                    "kind": "missing_action_resource_delta",
+                    "resource": exp.get("resource"),
+                    "expected": exp.get("delta"),
+                    "actual": None,
+                    "expected_full": exp,
+                }
+            continue
+
+        act = bucket.pop(0)
+        exp_val = float(exp.get("delta", 0.0) or 0.0)
+        act_val = float(act.get("delta", 0.0) or 0.0)
+        
+        if abs(exp_val - act_val) > delta_tol:
+            delta_mismatches += 1
+            mismatches += 1
+            if not first_mismatch:
+                first_mismatch = {
+                    "turn": exp.get("turn"),
+                    "id": exp.get("actor"),
+                    "kind": "action_resource_delta",
+                    "resource": exp.get("resource"),
+                    "expected": exp_val,
+                    "actual": act_val,
+                    "expected_full": exp,
+                    "actual_full": act,
+                }
+
+    leftover = [a for bucket in actual_by_key.values() for a in bucket]
+    extra_count = len(leftover)
+    extra += extra_count
+    checks += extra_count
+    mismatches += extra_count
+    
+    if leftover and not first_mismatch:
+        extra_event = leftover[0]
+        first_mismatch = {
+            "turn": extra_event.get("turn"),
+            "id": extra_event.get("actor"),
+            "kind": "extra_action_resource_delta",
+            "resource": extra_event.get("resource"),
+            "expected": None,
+            "actual": extra_event.get("delta"),
+            "actual_full": extra_event,
+        }
+
+    accuracy = 1.0 - (mismatches / checks) if checks > 0 else 0.0
+
+    return {
+        "checks": checks,
+        "mismatches": mismatches,
+        "identity_mismatches": identity_mismatches,
+        "delta_mismatches": delta_mismatches,
+        "missing": missing,
+        "extra": extra,
+        "accuracy": accuracy,
+        "first_mismatch": first_mismatch
+    }
+
+
 def _worker_simulate_match(args):
     """
     병렬 처리 워커: Windows Pickling 에러 방지를 위해 모듈 레벨에 정의.
@@ -997,6 +1566,73 @@ def _worker_simulate_match(args):
         # 워커별 독립 RNG 인스턴스 생성
         stoch_instance = stochasticity_factory(worker_seed) if stochasticity_factory else None
         
+        expected_state = (game_config or {}).get("_expected_state_snapshots")
+        state_cfg = (game_config or {}).get("_state_score_config") or {}
+        actual_state = {}
+
+        def _capture_state(ctx):
+            actual_state[ctx.get("turn")] = _snapshot_for_worker(
+                ctx["participants"],
+                hp_mode=state_cfg.get("hp_mode", "absolute"),
+                resource_names=state_cfg.get("resource_names") or [],
+                resource_mode=state_cfg.get("resource_mode", "absolute"),
+            )
+
+        cb = _capture_state if expected_state else None
+        
+        expected_damage = (game_config or {}).get("_expected_action_damage_trace")
+        damage_cfg = (game_config or {}).get("_action_damage_score_config") or {}
+        actual_damage = []
+        
+        expected_resource_delta = (game_config or {}).get("_expected_action_resource_delta_trace")
+        resource_delta_cfg = (game_config or {}).get("_action_resource_delta_score_config") or {}
+        actual_resource_delta = []
+
+        observed_resource_names = {
+            str(x) for x in (resource_delta_cfg.get("resource_names") or [])
+        }
+        strict_resource_extra = bool(resource_delta_cfg.get("strict_extra", False))
+
+        def _capture_phase(pk, ctx, targets=None):
+            if pk != "APPLY_DAMAGE":
+                return
+            actor = ctx.get("active_char") or {}
+            move = ctx.get("current_move") or {}
+            target_list = targets if isinstance(targets, list) else [targets]
+            for t in target_list:
+                if not t:
+                    continue
+                dr = ctx.get("damage_result") or {}
+                actual_damage.append({
+                    "turn": int(ctx.get("turn") or 0),
+                    "actor": str(actor.get("id")),
+                    "target": str(t.get("id")),
+                    "damage": float(dr.get("damage", ctx.get("dmg", 0.0)) or 0.0),
+                    "hp_delta": float(dr.get("hp_delta", ctx.get("dmg", 0.0)) or 0.0),
+                    "hp_before": float(dr.get("hp_before", 0.0) or 0.0),
+                    "hp_after": float(dr.get("hp_after", 0.0) or 0.0),
+                    "absorbed": float(dr.get("absorbed", 0.0) or 0.0),
+                    "move": str(move.get("name") or ""),
+                })
+                
+                if expected_resource_delta:
+                    for rname, delta in (dr.get("resource_deltas") or {}).items():
+                        rname_s = str(rname)
+                        if observed_resource_names and not strict_resource_extra and rname_s not in observed_resource_names:
+                            continue
+                        if float(delta or 0.0) <= 0:
+                            continue
+                        actual_resource_delta.append({
+                            "turn": int(ctx.get("turn") or 0),
+                            "actor": str(actor.get("id")),
+                            "target": str(t.get("id")),
+                            "resource": rname_s,
+                            "delta": float(delta or 0.0),
+                            "move": str(move.get("name") or ""),
+                        })
+
+        phase_cb = _capture_phase if (expected_damage or expected_resource_delta) else None
+
         winner, _, sim_metrics = run_simulation(
             ally_copy, enemy_copy, max_turns=max_turns,
             combat_flow=combat_flow, speed_stat=speed_stat, sys_stats=sys_stats,
@@ -1004,8 +1640,32 @@ def _worker_simulate_match(args):
             stochasticity=stoch_instance,
             resource_module=resource_module,
             spatial_module=spatial_module, range_stat=range_stat, move_stat=move_stat,
-            deck_module=deck_module, game_config=game_config
+            deck_module=deck_module, game_config=game_config,
+            on_turn_end=cb, on_phase_event=phase_cb
         )
+        
+        if expected_state:
+            sim_metrics["state_score"] = _score_state_snapshots_for_worker(
+                expected_state, actual_state, 
+                hp_tol=float(state_cfg.get("hp_tol", 0.0) or 0.0),
+                resource_tol=float(state_cfg.get("resource_tol", 0.0) or 0.0)
+            )
+
+        if expected_damage:
+            sim_metrics["action_damage_score"] = _score_action_damage_for_worker(
+                expected_damage, actual_damage, 
+                damage_tol=float(damage_cfg.get("damage_tol", 0.0) or 0.0),
+                compare_field=str(damage_cfg.get("compare_field") or "damage")
+            )
+            
+        if expected_resource_delta:
+            sim_metrics["action_resource_delta_score"] = _score_action_resource_delta_for_worker(
+                expected_resource_delta, actual_resource_delta,
+                delta_tol=float(resource_delta_cfg.get("delta_tol", 0.0) or 0.0),
+                resource_names=resource_delta_cfg.get("resource_names") or [],
+                strict_extra=bool(resource_delta_cfg.get("strict_extra", False)),
+            )
+            
         return (1 if winner == "Ally" else 0, sim_metrics)
     except Exception as e:
         return f"ERROR: {traceback.format_exc()}"
@@ -1077,7 +1737,8 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
                    stochasticity: StochasticityModule = None,
                    resource_module=None,
                    spatial_module=None, range_stat=None,
-                   move_stat=None, deck_module=None, game_config=None):
+                   move_stat=None, deck_module=None, game_config=None, on_turn_end=None,
+                   on_round_start=None, on_phase_event=None):
     logs = []
     def add_log(msg): 
         if not silent: logs.append(msg)
@@ -1090,6 +1751,7 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
     if not sys_stats: sys_stats = []
     if not global_damage_formula: global_damage_formula = "0"
     if game_config is None: game_config = {}
+    _preserve_ids = bool(game_config.get("preserve_ids"))
 
     # ── Stochasticity 결정 ──
     stochasticity_instance = stochasticity or NoVariance()
@@ -1106,7 +1768,7 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
     participants = []
     for i, inst in enumerate(ally_instances):
         if inst:
-            p = {**inst, "id": f"A{i+1}", "team": "Ally"}
+            p = {**inst, "id": (inst.get("id") or f"A{i+1}") if _preserve_ids else f"A{i+1}", "team": "Ally"}
             p['resources'] = copy.deepcopy(inst.get('resources', {}))
             p['position'] = copy.deepcopy(inst.get('position'))
             p['deck'] = copy.deepcopy(inst.get('deck', []))
@@ -1116,7 +1778,7 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
             participants.append(p)
     for i, inst in enumerate(enemy_instances):
         if inst:
-            p = {**inst, "id": f"E{i+1}", "team": "Enemy"}
+            p = {**inst, "id": (inst.get("id") or f"E{i+1}") if _preserve_ids else f"E{i+1}", "team": "Enemy"}
             p['resources'] = copy.deepcopy(inst.get('resources', {}))
             p['position'] = copy.deepcopy(inst.get('position'))
             p['deck'] = copy.deepcopy(inst.get('deck', []))
@@ -1133,12 +1795,19 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
         _ac_cfg = int(_gc_field.get("active_count"))
     except (TypeError, ValueError):
         _ac_cfg = None
+    _preserve_initial_on_field = bool(_gc_field.get("preserve_initial_on_field"))
     for _team_name in ("Ally", "Enemy"):
         _team_members = [p for p in participants if p['team'] == _team_name]
         _ac = _ac_cfg if (_ac_cfg and _ac_cfg > 0) else len(_team_members)
-        for _ri, _p in enumerate(_team_members):
-            _p['roster_idx'] = _ri
-            _p['on_field'] = _ri < _ac
+        _has_explicit_on_field = _preserve_initial_on_field and any("on_field" in p for p in _team_members)
+        if _has_explicit_on_field and any(bool(p.get("on_field")) for p in _team_members):
+            for _ri, _p in enumerate(_team_members):
+                _p['roster_idx'] = _ri
+                _p['on_field'] = bool(_p.get("on_field", False))
+        else:
+            for _ri, _p in enumerate(_team_members):
+                _p['roster_idx'] = _ri
+                _p['on_field'] = _ri < _ac
 
     if not any(p['team'] == 'Ally' for p in participants) or \
        not any(p['team'] == 'Enemy' for p in participants):
@@ -1258,6 +1927,13 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
         
         attack_range = get_effective_stat(active_char, range_stat) if range_stat else None
         move_range = get_effective_stat(active_char, move_stat) if move_stat else None
+        # 발효 날씨를 field_state에 공급(트레이스 관측값) — 디스패처 weather 조건·모래칩용(PR-E′2b).
+        # weather_by_turn 미설정 시 None(회귀0).
+        field_state["weather"] = ((game_config or {}).get("weather_by_turn") or {}).get(turn)
+        # PR-F2: 트레이스 hazard_by_turn 주입 제거 (하니스에서 단일 적용).
+        # _hz = ((game_config or {}).get("hazard_by_turn") or {}).get(turn)
+        # if _hz is not None:
+        #     field_state["hazard"] = _hz      # 미설정 시 미터치 → 회귀0(set_hazard 무브경로 보존)
 
         ctx = {
             "active_char":   active_char,
@@ -1275,6 +1951,7 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
             "stochasticity": stochasticity_instance,
             "resource_module": resource_module,
             "spatial_module": spatial_module,
+            "on_phase_event": on_phase_event,
             "attack_range":   attack_range,
             "move_range":     move_range,
             # 아래는 액션 블록이 채우는 런타임 값
@@ -1304,7 +1981,19 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
     # (회귀 0). 예측은 실행과 같은 공유 순수 코어(_candidate_targets·_select_move_pure)를 호출해
     # 싱글에서 "예측한 무브 = 실제 실행 무브"를 구조적으로 보장한다. build_ctx(turn=0)은 로그
     # 문자열에만 turn을 쓰므로 예측 결과에 영향 없음.
-    def _predict_action_priority(unit):
+    def _predict_action_priority(unit, turn=None):
+        ta = (game_config or {}).get("trace_actions") or {}
+        if turn is not None:
+            sw = (ta.get("switch") or {}).get((turn, unit.get("id")))
+            if sw:
+                return int((game_config or {}).get("switch_priority", 6))
+            ma = (ta.get("move") or {}).get((turn, unit.get("id")))
+            if ma:
+                try:
+                    return int((ma.get("move") or {}).get("priority", 0))
+                except (TypeError, ValueError):
+                    return 0
+
         if _will_voluntary_switch(unit, participants, game_config):
             return int((game_config or {}).get("switch_priority", 6))
         _pctx = build_ctx(unit, 0, participants)
@@ -1321,16 +2010,25 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
         except (TypeError, ValueError):
             return 0
 
+    _btn = _broadcast_phase_event
+    if on_turn_end is not None:
+        def _btn(_pk, _ctx, _targets=None, _orig=_broadcast_phase_event, 
+                 _turn_cb=on_turn_end):
+            _orig(_pk, _ctx, _targets)
+            if _pk == "TURN_END":
+                _turn_cb(_ctx)
     manager = TurnManagerCls(
         action_registry=registry,
         turn_executor=turn_executor,
         speed_stat=speed_stat,
-        broadcast_phase_event=_broadcast_phase_event,
+        broadcast_phase_event=_btn,
         win_condition=win_condition,
         resource_module=resource_module,
         on_active_faint=(game_config or {}).get("on_active_faint"),
         action_priority=_predict_action_priority,
         on_switch_in=lambda _char, _parts, _alog: _fire_switch_in(_char, _parts, game_config, _alog, field_state),
+        trace_faint_incoming=(game_config or {}).get("trace_faint_incoming"),
+        on_round_start=on_round_start,
     )
 
     winner, sim_metrics = manager.run(

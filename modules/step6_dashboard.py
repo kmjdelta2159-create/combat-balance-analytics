@@ -24,12 +24,63 @@ from modules.optimizer import optimize_allocation
 from modules.spatial import SpatialModule
 from modules.deck import DeckModule
 from modules.detection import module_active
-# ── D5 추가: 가중치 기반 동적 Dashboard (D4 설계안 §11) ──
-from modules.ui_registry import (
-    render_dynamic_dashboard,
-    render_weight_panel,
-    build_mock_state_from_log,
-)
+from modules.effect_key_roles import promote_effect_keys
+
+
+def _select_backtest_stochasticity_factory(log_schema):
+    if log_schema and log_schema.get("state_trace_enabled"):
+        if bool(log_schema.get("state_score_deterministic", True)):
+            return None
+    return default_stochasticity_factory
+
+def _json_safe(val):
+    if isinstance(val, (int, float, str, bool, type(None))):
+        if isinstance(val, float) and math.isnan(val):
+            return None
+        return val
+    if isinstance(val, (list, tuple)):
+        return [_json_safe(x) for x in val]
+    if isinstance(val, dict):
+        return {str(k): _json_safe(v) for k, v in val.items()}
+    if pd.isna(val):
+        return None
+    try:
+        import numpy as np
+        if isinstance(val, np.generic):
+            return _json_safe(val.item())
+    except ImportError:
+        pass
+    return str(val)
+
+def _build_db_corpus_schema_payload(system_stats, system_gimmicks, health_stat, target_col, battle_size, log_schema, session_state_like):
+    import copy
+    from modules.engine import DEFAULT_COMBAT_FLOW
+    gc = copy.deepcopy(session_state_like.get("game_config") or {})
+    if log_schema and log_schema.get("entity_id_col"):
+        gc["preserve_ids"] = True
+
+    payload = {
+        "schema_version": "db_corpus_backtest.v1",
+        "generated_from": "step6_dashboard",
+        "system_stats": system_stats,
+        "system_gimmicks": system_gimmicks,
+        "health_stat": health_stat,
+        "resource_config": session_state_like.get("resource_config"),
+        "game_config": gc,
+        "log_schema": log_schema,
+        "target_col": target_col,
+        "battle_size": battle_size,
+        "combat_flow": session_state_like.get("combat_flow", DEFAULT_COMBAT_FLOW),
+        "speed_stat": session_state_like.get("speed_stat"),
+        "global_damage_formula": session_state_like.get("global_damage_formula", "0"),
+        "sim_max_turns": session_state_like.get("sim_max_turns", 100),
+        "move_library": session_state_like.get("move_library"),
+        "damage_type_map": session_state_like.get("damage_type_map"),
+        "range_stat": session_state_like.get("range_stat"),
+        "move_stat": session_state_like.get("move_stat")
+    }
+    return _json_safe(payload)
+
 
 def calc_instance_score(inst, coefs):
     val = 0.0
@@ -126,6 +177,40 @@ def check_df_changes(old_df, new_df):
                 for s in sys_stats: new_df.loc[i, s] = 0.0
                 for g in sys_gimmicks: new_df.loc[i, g] = "None"
     return changed, new_df
+
+def _mismatch_row_from_score(battle_index, score_type, score):
+    _fm = score.get("first_mismatch")
+    if not _fm:
+        return None
+    checks = max(1, score.get("checks", 1) or 1)
+    mismatches = score.get("mismatches", 0) or 0
+    accuracy = score.get("accuracy")
+    if accuracy is None:
+        accuracy = (1.0 - (mismatches / checks)) * 100.0
+    return {
+        "battle_index": battle_index,
+        "score_type": score_type,
+        "turn": _fm.get("turn"),
+        "id": _fm.get("id"),
+        "kind": _fm.get("kind"),
+        "resource": _fm.get("resource"),
+        "expected": _fm.get("expected"),
+        "actual": _fm.get("actual"),
+        "checks": score.get("checks"),
+        "mismatches": score.get("mismatches"),
+        "accuracy": accuracy,
+        "expected_full": repr(_fm.get("expected_full", _fm.get("expected"))),
+        "actual_full": repr(_fm.get("actual_full", _fm.get("actual")))
+    }
+
+def _extend_mismatch_rows_from_metrics(rows, battle_index, metrics):
+    if not metrics:
+        return
+    for stype in ["state_score", "action_damage_score", "action_resource_delta_score"]:
+        if metrics.get(stype):
+            row = _mismatch_row_from_score(battle_index, stype.replace("_score", ""), metrics[stype])
+            if row:
+                rows.append(row)
 
 def render_dashboard():
     # 1. 불필요한 타이틀 및 설명글 제거 (상단 압축)
@@ -453,6 +538,7 @@ def render_dashboard():
                         if row["Hero"] and row["Hero"] != "비어 있음" and not pd.isna(row["Hero"]):
                             inst = {"name": row["Hero"], "gimmicks": {}}
                             for g in sys_gimmicks: inst["gimmicks"][g] = row.get(g, "None")
+                            promote_effect_keys(inst, st.session_state.get("game_config"))
                             for s in sys_stats: inst[s] = float(row[s])
                             # 자원 설정 기반 다중 자원 빌드
                             inst['resources'] = {}
@@ -925,29 +1011,514 @@ def render_dashboard():
                         )
                     else:
                         _bb_n_rows = len(_bb_df)
-                        _bb_c1, _bb_c2 = st.columns(2)
-                        with _bb_c1:
-                            _bb_size = st.number_input(
-                                "전투당 행 수 (1v1=2 · 2v2=4 · 4v4=8 — 로그가 캐릭터-per-행 패턴일 때)",
-                                min_value=2, max_value=20, value=2, step=2,
-                                key="ui_backtest_size",
-                                help="로그가 캐릭터당 한 행이라면, 한 전투의 모든 참가자가 연속해서 행으로 들어 있다고 가정합니다. "
-                                     "앞쪽 절반 = Ally, 뒤쪽 절반 = Enemy."
-                            )
-                        with _bb_c2:
-                            _bb_max_cap = max(10, _bb_n_rows // max(int(_bb_size), 2))
-                            _bb_max_default = min(500, _bb_max_cap)
-                            _bb_max = st.number_input(
-                                f"최대 전투 수 (로그 전체 = {_bb_max_cap})",
-                                min_value=10, max_value=max(_bb_max_cap, 10),
-                                value=_bb_max_default, step=50,
-                                key="ui_backtest_max",
-                                help="성능 한계 — 500전투 ≈ 수십 초. 전수 검사하려면 최대치로."
-                            )
+                        
+                        _bb_method = st.radio(
+                            "전투 구성 방식",
+                            ["행 개수로 묶기 (기존)", "DB 역할 컬럼으로 묶기"],
+                            horizontal=True,
+                            help="로그 구조에 따라 선택하세요. 'DB 역할 컬럼'은 전투ID와 진영 컬럼을 기반으로 구성합니다."
+                        )
+                        
+                        _bb_size = 2
+                        _bb_max = 500
+                        _bb_log_schema = None
+                        
+                        if _bb_method == "행 개수로 묶기 (기존)":
+                            _bb_c1, _bb_c2 = st.columns(2)
+                            with _bb_c1:
+                                _bb_size = st.number_input(
+                                    "전투당 행 수 (1v1=2 · 2v2=4 · 4v4=8 — 로그가 캐릭터-per-행 패턴일 때)",
+                                    min_value=2, max_value=20, value=2, step=2,
+                                    key="ui_backtest_size",
+                                    help="로그가 캐릭터당 한 행이라면, 한 전투의 모든 참가자가 연속해서 행으로 들어 있다고 가정합니다. 앞쪽 절반 = Ally, 뒤쪽 절반 = Enemy."
+                                )
+                            with _bb_c2:
+                                _bb_max_cap = max(10, _bb_n_rows // max(int(_bb_size), 2))
+                                _bb_max_default = min(500, _bb_max_cap)
+                                _bb_max = st.number_input(
+                                    f"최대 전투 수 (로그 전체 = {_bb_max_cap})",
+                                    min_value=10, max_value=max(_bb_max_cap, 10),
+                                    value=_bb_max_default, step=50,
+                                    key="ui_backtest_max_legacy"
+                                )
+                        else:
+                            st.markdown("##### 🗂️ DB 역할 컬럼 매핑")
+                            _all_cols = ["(없음)"] + list(_bb_df.columns)
+                            
+                            def _guess_col(hints):
+                                for col in _bb_df.columns:
+                                    cl = str(col).lower()
+                                    if any(h in cl for h in hints):
+                                        return col
+                                return "(없음)"
+                                
+                            _g_battle = _guess_col(["battle", "match", "combat", "game", "전투", "매치"])
+                            _g_team = _guess_col(["team", "side", "camp", "faction", "player", "진영", "팀"])
+                            _g_entity = _guess_col(["unit", "actor", "character", "hero", "pokemon", "entity", "slot", "유닛", "캐릭터"])
+                            _g_sort = _guess_col(["turn", "round", "order", "seq", "index", "턴", "순서"])
+                            
+                            _bc1, _bc2 = st.columns(2)
+                            with _bc1:
+                                _bb_id_col = st.selectbox("전투 ID 컬럼", _all_cols, index=_all_cols.index(_g_battle) if _g_battle in _all_cols else 0)
+                                _bb_team_col = st.selectbox("팀/진영 컬럼", _all_cols, index=_all_cols.index(_g_team) if _g_team in _all_cols else 0)
+                            with _bc2:
+                                _bb_ent_col = st.selectbox("참가자 ID 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_entity) if _g_entity in _all_cols else 0)
+                                _bb_sort_cols = st.multiselect("정렬 컬럼 (선택)", list(_bb_df.columns), default=[_g_sort] if _g_sort != "(없음)" else [])
+                                
+                            _rc1, _rc2 = st.columns(2)
+                            with _rc1:
+                                _bb_res_mode = st.selectbox("결과 해석 방식", ["battle_level", "side_signal"], index=0, help="battle_level: 그룹 첫 행의 승리 여부를 전투 결과로 봄 / side_signal: 팀 멤버별 결과의 합산 비교")
+                            with _rc2:
+                                _bb_max = st.number_input(
+                                    "최대 전투 수",
+                                    min_value=10, max_value=max(10, _bb_n_rows),
+                                    value=min(500, max(10, _bb_n_rows)), step=50,
+                                    key="ui_backtest_max_db"
+                                )
+                                
+                            with st.expander("팀 값(문자열) 상세 매핑", expanded=False):
+                                _ac1, _ac2 = st.columns(2)
+                                with _ac1:
+                                    _bb_ally_vals = st.text_input("Ally로 인식할 추가 값 (쉼표 구분)", "Ally, ally, A, blue, player")
+                                with _ac2:
+                                    _bb_enemy_vals = st.text_input("Enemy로 인식할 추가 값 (쉼표 구분)", "Enemy, enemy, E, red, opponent")
+                                    
+                            with st.expander("초기 필드 상태 (선택)", expanded=False):
+                                _if_use = st.checkbox("initial active/on-field 사용", value=False)
+                                
+                                _ic1, _ic2 = st.columns(2)
+                                with _ic1:
+                                    _g_i_on_field = _guess_col(["on_field", "active", "lead", "starter", "front", "slot_active", "initial_active", "is_active", "field", "선발", "초기", "활성", "필드", "전열"])
+                                    _bb_initial_on_field_col = st.selectbox("initial on-field 컬럼", _all_cols, index=_all_cols.index(_g_i_on_field) if _g_i_on_field in _all_cols else 0)
+                                with _ic2:
+                                    _bb_initial_values = st.text_input("active로 인식할 값 목록 (쉼표 구분)", "1, true, yes, y, active, lead, on, field, front, starter, 초기, 선발, 활성, 필드, 전열")
+                                    
+                                _g_i_order = _guess_col(["roster_idx", "slot", "position", "party_order", "team_order", "order", "seq", "배치", "순서", "슬롯"])
+                                _bb_initial_order_col = st.selectbox("initial roster/order 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_i_order) if _g_i_order in _all_cols else 0)
 
-                        if st.button("🔬 백테스트 실행", use_container_width=True, key="run_backtest"):
+                            with st.expander("관측 상태 trace (선택)", expanded=False):
+                                _st_use = st.checkbox("state snapshot trace 사용", value=False)
+                                
+                                _sc1, _sc2 = st.columns(2)
+                                with _sc1:
+                                    _g_s_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _bb_state_turn_col = st.selectbox("state turn 컬럼", _all_cols, index=_all_cols.index(_g_s_turn) if _g_s_turn in _all_cols else 0)
+                                with _sc2:
+                                    _g_s_id = _guess_col(["unit", "entity", "actor", "character", "hero", "pokemon", "참가자", "유닛"])
+                                    _bb_state_id_col = st.selectbox("state entity ID 컬럼", _all_cols, index=_all_cols.index(_g_s_id) if _g_s_id in _all_cols else 0)
+                                    
+                                _sc3, _sc4, _sc5 = st.columns(3)
+                                with _sc3:
+                                    _g_s_hp = _guess_col(["hp", "health", "current_hp", "remain_hp", "hp_after", "체력", "잔여"])
+                                    _bb_state_hp_col = st.selectbox("state HP 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_hp) if _g_s_hp in _all_cols else 0)
+                                with _sc4:
+                                    _g_s_status = _guess_col(["status", "condition", "state", "상태", "상태이상"])
+                                    _bb_state_status_col = st.selectbox("state status 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_status) if _g_s_status in _all_cols else 0)
+                                with _sc5:
+                                    _g_s_fainted = _guess_col(["fainted", "dead", "ko", "down", "is_dead", "is_fainted", "기절", "쓰러짐"])
+                                    _bb_state_fainted_col = st.selectbox("state fainted 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_fainted) if _g_s_fainted in _all_cols else 0)
+                                    
+                                _sc6, _sc7 = st.columns(2)
+                                with _sc6:
+                                    _bb_state_hp_mode = st.selectbox("state HP mode", ["absolute", "percent"], index=0)
+                                with _sc7:
+                                    _bb_state_hp_tol = st.number_input("HP 허용 오차", min_value=0.0, value=0.0, step=1.0)
+                                    
+                                _bb_state_resource_cols = {}
+                                _resource_config_for_state = st.session_state.get("resource_config") or {}
+                                _resource_names_for_state = [
+                                    r for r in _resource_config_for_state.keys()
+                                    if str(r) != "HP"
+                                ]
+                                _bb_state_resource_names = st.multiselect(
+                                    "state resource 컬럼 추가",
+                                    _resource_names_for_state,
+                                    default=[],
+                                    help="HP 외 MP/Shield/Cost 등 임의 자원의 관측 current 값을 비교합니다."
+                                )
+                                for _rname in _bb_state_resource_names:
+                                    _guess = _guess_col([str(_rname).lower(), str(_rname), f"{_rname}_after", f"{_rname}_current"])
+                                    _col = st.selectbox(
+                                        f"state {_rname} 컬럼",
+                                        _all_cols,
+                                        index=_all_cols.index(_guess) if _guess in _all_cols else 0,
+                                        key=f"bb_state_resource_col_{_rname}",
+                                    )
+                                    if _col != "(없음)":
+                                        _bb_state_resource_cols[str(_rname)] = _col
+
+                                _sc8, _sc9 = st.columns(2)
+                                with _sc8:
+                                    _bb_state_resource_mode = st.selectbox(
+                                        "state resource mode",
+                                        ["absolute", "percent"],
+                                        index=0,
+                                        key="bb_state_resource_mode",
+                                    )
+                                with _sc9:
+                                    _bb_state_resource_tol = st.number_input(
+                                        "resource 허용 오차",
+                                        min_value=0.0,
+                                        value=0.0,
+                                        step=1.0,
+                                        key="bb_state_resource_tol",
+                                    )
+
+                                _bb_state_deterministic = st.checkbox(
+                                    "state score는 결정론으로 계산",
+                                    value=True,
+                                    help="DB 관측 상태와 엔진 상태를 비교할 때 데미지 분산을 끄고 복제 오차만 봅니다."
+                                )
+
+                            with st.expander("행동 trace 연결 (선택)", expanded=False):
+                                _tc_use = st.checkbox("move trace 사용", value=False)
+                                
+                                _tc1, _tc2, _tc3 = st.columns(3)
+                                with _tc1:
+                                    _g_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _bb_turn_col = st.selectbox("turn 컬럼", _all_cols, index=_all_cols.index(_g_turn) if _g_turn in _all_cols else 0)
+                                with _tc2:
+                                    _g_actor = _guess_col(["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
+                                    _bb_actor_col = st.selectbox("actor ID 컬럼", _all_cols, index=_all_cols.index(_g_actor) if _g_actor in _all_cols else 0)
+                                with _tc3:
+                                    _g_target = _guess_col(["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
+                                    _bb_target_col = st.selectbox("target ID 컬럼", _all_cols, index=_all_cols.index(_g_target) if _g_target in _all_cols else 0)
+                                    
+                                _tc4, _tc5 = st.columns(2)
+                                with _tc4:
+                                    _g_move = _guess_col(["move", "skill", "action_name", "ability_name", "무브", "스킬", "행동명"])
+                                    _bb_move_name_col = st.selectbox("move name 컬럼", _all_cols, index=_all_cols.index(_g_move) if _g_move in _all_cols else 0)
+                                    _g_action = _guess_col(["action", "event", "type", "kind", "행동", "이벤트", "종류"])
+                                    _bb_action_col = st.selectbox("action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_action) if _g_action in _all_cols else 0)
+                                with _tc5:
+                                    _bb_action_vals = st.text_input("move action 값 목록 (쉼표 구분)", "move, attack, skill, cast, use, use_move, act, 공격, 스킬, 무브, 행동")
+                                
+                                st.markdown("**무브 속성 오버라이드 컬럼 (선택)**")
+                                _tp1, _tp2, _tp3, _tp4 = st.columns(4)
+                                with _tp1: _bb_move_pwr = st.selectbox("power", _all_cols, index=0)
+                                with _tp2: _bb_move_typ = st.selectbox("type", _all_cols, index=0)
+                                with _tp3: _bb_move_cat = st.selectbox("category", _all_cols, index=0)
+                                with _tp4: _bb_move_pri = st.selectbox("priority", _all_cols, index=0)
+                                    
+                                st.markdown("**행동 순서 (선택)**")
+                                _to1, _to2 = st.columns(2)
+                                with _to1:
+                                    _g_order = _guess_col(["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
+                                    _bb_move_order = st.selectbox("action order 컬럼", _all_cols, index=_all_cols.index(_g_order) if _g_order in _all_cols else 0)
+                                with _to2:
+                                    _bb_move_order_dir = st.selectbox("order 방향", ["ascending_first", "descending_first"])
+                                    
+                                st.markdown("---")
+                                _ts_use = st.checkbox("switch trace 사용", value=False)
+                                
+                                _sc1, _sc2, _sc3 = st.columns(3)
+                                with _sc1:
+                                    _g_s_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _bb_switch_turn_col = st.selectbox("switch turn 컬럼", _all_cols, index=_all_cols.index(_g_s_turn) if _g_s_turn in _all_cols else 0)
+                                with _sc2:
+                                    _g_s_out = _guess_col(["outgoing", "switch_from", "actor", "unit", "entity", "old_unit", "switch_out_id", "교체자", "이탈"])
+                                    _bb_switch_out_col = st.selectbox("switch outgoing ID 컬럼", _all_cols, index=_all_cols.index(_g_s_out) if _g_s_out in _all_cols else 0)
+                                with _sc3:
+                                    _g_s_in = _guess_col(["incoming", "switch_to", "next_unit", "new_unit", "replacement", "bench_in", "switch_in_id", "교체대상", "진입", "등장"])
+                                    _bb_switch_in_col = st.selectbox("switch incoming ID 컬럼", _all_cols, index=_all_cols.index(_g_s_in) if _g_s_in in _all_cols else 0)
+                                    
+                                _sc4, _sc5 = st.columns(2)
+                                with _sc4:
+                                    _g_s_action = _guess_col(["action", "event", "type", "kind", "switch", "교체", "스위치", "태그"])
+                                    _bb_switch_action_col = st.selectbox("switch action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_action) if _g_s_action in _all_cols else 0)
+                                with _sc5:
+                                    _bb_switch_action_vals = st.text_input("switch action 값 목록 (쉼표 구분)", "switch, swap, tag, change, substitute, switch_out, switch_in, 교체, 스위치, 태그, 변경")
+                                    
+                                st.markdown("---")
+                                _tf_use = st.checkbox("faint incoming trace 사용", value=False)
+                                
+                                _fc1, _fc2 = st.columns(2)
+                                with _fc1:
+                                    _g_f_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _bb_faint_turn_col = st.selectbox("faint turn 컬럼", _all_cols, index=_all_cols.index(_g_f_turn) if _g_f_turn in _all_cols else 0)
+                                with _fc2:
+                                    _g_f_side = _guess_col(["side", "team", "camp", "faction", "player", "진영", "팀"])
+                                    _bb_faint_side_col = st.selectbox("faint side 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_f_side) if _g_f_side in _all_cols else 0)
+                                    
+                                _fc3, _fc4 = st.columns(2)
+                                with _fc3:
+                                    _g_f_out = _guess_col(["fainted", "faint", "ko", "dead", "defeated", "outgoing", "old_unit", "unit", "actor", "쓰러짐", "기절", "이탈"])
+                                    _bb_faint_out_col = st.selectbox("faint outgoing ID 컬럼", _all_cols, index=_all_cols.index(_g_f_out) if _g_f_out in _all_cols else 0)
+                                with _fc4:
+                                    _g_f_in = _guess_col(["incoming", "replacement", "replace", "send_out", "next_unit", "new_unit", "bench_in", "진입", "등장", "교체대상"])
+                                    _bb_faint_in_col = st.selectbox("faint incoming ID 컬럼", _all_cols, index=_all_cols.index(_g_f_in) if _g_f_in in _all_cols else 0)
+                                    
+                                _fc5, _fc6 = st.columns(2)
+                                with _fc5:
+                                    _g_f_action = _guess_col(["action", "event", "type", "kind", "faint", "ko", "replace", "send_out", "기절", "쓰러짐", "등장", "진입"])
+                                    _bb_faint_action_col = st.selectbox("faint action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_f_action) if _g_f_action in _all_cols else 0)
+                                with _fc6:
+                                    _bb_faint_action_vals = st.text_input("faint action 값 목록 (쉼표 구분)", "faint_replace, replace, replacement, send_out, enter_after_faint, fainted_switch, faint_incoming, ko_replace, forced_switch, 기절교체, 쓰러짐교체, 강제교체, 등장, 진입")
+                                    
+                                st.markdown("---")
+                                _td_use = st.checkbox("damage trace score 사용", value=False)
+                                
+                                _td1, _td2, _td3 = st.columns(3)
+                                with _td1:
+                                    _g_dt = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _bb_damage_turn_col = st.selectbox("damage turn 컬럼", _all_cols, index=_all_cols.index(_g_dt) if _g_dt in _all_cols else 0)
+                                with _td2:
+                                    _g_da = _guess_col(["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
+                                    _bb_damage_actor_col = st.selectbox("damage actor ID 컬럼", _all_cols, index=_all_cols.index(_g_da) if _g_da in _all_cols else 0)
+                                with _td3:
+                                    _g_dtg = _guess_col(["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
+                                    _bb_damage_target_col = st.selectbox("damage target ID 컬럼", _all_cols, index=_all_cols.index(_g_dtg) if _g_dtg in _all_cols else 0)
+                                    
+                                _td4, _td5 = st.columns(2)
+                                with _td4:
+                                    _g_dval = _guess_col(["damage", "dmg", "hp_delta", "damage_done", "damage_amount", "피해", "데미지", "딜", "체력감소"])
+                                    _bb_damage_value_col = st.selectbox("damage value 컬럼", _all_cols, index=_all_cols.index(_g_dval) if _g_dval in _all_cols else 0)
+                                    _bb_damage_value_kind = st.selectbox(
+                                        "damage 값 의미",
+                                        ["damage", "hp_delta"],
+                                        index=0,
+                                        help="damage는 엔진 계산 데미지, hp_delta는 실제 HP 감소량과 비교합니다."
+                                    )
+                                    _bb_damage_tol = st.number_input("damage 허용 오차", min_value=0.0, value=0.0, step=1.0)
+                                with _td5:
+                                    _g_dact = _guess_col(["action", "event", "type", "kind", "행동", "이벤트", "종류"])
+                                    _bb_damage_action_col = st.selectbox("damage action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_dact) if _g_dact in _all_cols else 0)
+                                    _bb_damage_action_vals = st.text_input("damage action 값 목록 (쉼표 구분)", "damage, hit, apply_damage, dmg, 피해, 데미지, 피격")
+                                    
+                                _td6, _td7, _td8 = st.columns(3)
+                                with _td6:
+                                    _g_dmv = _guess_col(["move", "skill", "action_name", "ability_name", "무브", "스킬", "행동명"])
+                                    _bb_damage_move_name_col = st.selectbox("damage move name 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_dmv) if _g_dmv in _all_cols else 0)
+                                with _td7:
+                                    _g_dord = _guess_col(["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
+                                    _bb_damage_order_col = st.selectbox("damage action order 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_dord) if _g_dord in _all_cols else 0)
+                                with _td8:
+                                    _bb_damage_order_dir = st.selectbox("damage order 방향", ["ascending_first", "descending_first"])
+                                    
+                                st.markdown("---")
+                                _trd_use = st.checkbox("resource delta trace score 사용", value=False)
+                                
+                                _trd1, _trd2, _trd3 = st.columns(3)
+                                with _trd1:
+                                    _g_trd_t = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _bb_resource_delta_turn_col = st.selectbox("resource delta turn 컬럼", _all_cols, index=_all_cols.index(_g_trd_t) if _g_trd_t in _all_cols else 0)
+                                with _trd2:
+                                    _g_trd_a = _guess_col(["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
+                                    _bb_resource_delta_actor_col = st.selectbox("resource delta actor ID 컬럼", _all_cols, index=_all_cols.index(_g_trd_a) if _g_trd_a in _all_cols else 0)
+                                with _trd3:
+                                    _g_trd_tg = _guess_col(["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
+                                    _bb_resource_delta_target_col = st.selectbox("resource delta target ID 컬럼", _all_cols, index=_all_cols.index(_g_trd_tg) if _g_trd_tg in _all_cols else 0)
+                                    
+                                _bb_resource_delta_cols = {}
+                                _resource_config_for_delta = st.session_state.get("resource_config") or {}
+                                _resource_names_for_delta = list(_resource_config_for_delta.keys())
+                                _bb_resource_delta_names = st.multiselect(
+                                    "resource delta 컬럼 추가",
+                                    _resource_names_for_delta,
+                                    default=[],
+                                    help="APPLY_DAMAGE로 감소한 HP/Shield/Armor 등 target resource loss를 비교합니다."
+                                )
+                                for _rname in _bb_resource_delta_names:
+                                    _guess = _guess_col([
+                                        f"{_rname}_loss", f"{_rname}_delta", f"{_rname}_damage",
+                                        str(_rname).lower(), str(_rname),
+                                    ])
+                                    _col = st.selectbox(
+                                        f"{_rname} loss/delta 컬럼",
+                                        _all_cols,
+                                        index=_all_cols.index(_guess) if _guess in _all_cols else 0,
+                                        key=f"bb_resource_delta_col_{_rname}",
+                                    )
+                                    if _col != "(없음)":
+                                        _bb_resource_delta_cols[str(_rname)] = _col
+
+                                _trd4, _trd5 = st.columns(2)
+                                with _trd4:
+                                    _g_trd_act = _guess_col(["action", "event", "type", "kind", "행동", "이벤트", "종류"])
+                                    _bb_resource_delta_action_col = st.selectbox("resource delta action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_trd_act) if _g_trd_act in _all_cols else 0)
+                                with _trd5:
+                                    _bb_resource_delta_action_vals = st.text_input("resource delta action 값 목록 (쉼표 구분)", "damage, hit, apply_damage, dmg, 피해, 데미지, 피격")
+
+                                _trd6, _trd7, _trd8 = st.columns(3)
+                                with _trd6:
+                                    _g_trd_ord = _guess_col(["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
+                                    _bb_resource_delta_order_col = st.selectbox("resource delta order 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_trd_ord) if _g_trd_ord in _all_cols else 0)
+                                with _trd7:
+                                    _bb_resource_delta_order_dir = st.selectbox("resource delta order 방향", ["ascending_first", "descending_first"])
+                                with _trd8:
+                                    _bb_resource_delta_tol = st.number_input("resource delta 허용 오차", min_value=0.0, value=0.0, step=1.0)
+                                    _bb_resource_delta_strict_extra = st.checkbox(
+                                        "관측하지 않은 resource delta도 extra로 벌점",
+                                        value=False,
+                                        help="꺼두면 매핑한 resource 컬럼만 score 대상으로 삼습니다."
+                                    )
+                                    
+                            if _bb_id_col != "(없음)" and _bb_team_col != "(없음)":
+                                _bb_log_schema = {
+                                    "battle_id_col": _bb_id_col,
+                                    "team_col": _bb_team_col,
+                                    "entity_id_col": None if _bb_ent_col == "(없음)" else _bb_ent_col,
+                                    "sort_cols": _bb_sort_cols,
+                                    "result_mode": _bb_res_mode,
+                                    "ally_values": [x.strip() for x in _bb_ally_vals.split(",") if x.strip()],
+                                    "enemy_values": [x.strip() for x in _bb_enemy_vals.split(",") if x.strip()]
+                                }
+                                if _if_use:
+                                    if _bb_initial_on_field_col == "(없음)":
+                                        st.warning("⚠️ initial active/on-field를 사용하려면 initial on-field 컬럼을 선택해야 합니다.")
+                                    else:
+                                        _bb_log_schema.update({
+                                            "initial_on_field_enabled": True,
+                                            "initial_on_field_col": _bb_initial_on_field_col,
+                                            "initial_on_field_values": [x.strip() for x in _bb_initial_values.split(",") if x.strip()],
+                                            "initial_order_col": None if _bb_initial_order_col == "(없음)" else _bb_initial_order_col,
+                                        })
+                                        
+                                if _st_use:
+                                    if _bb_state_turn_col == "(없음)" or _bb_state_id_col == "(없음)":
+                                        st.warning("⚠️ state snapshot trace를 사용하려면 state turn, state entity ID 컬럼을 모두 선택해야 합니다.")
+                                    elif _bb_state_hp_col == "(없음)" and _bb_state_status_col == "(없음)" and _bb_state_fainted_col == "(없음)" and not _bb_state_resource_cols:
+                                        st.warning("⚠️ state snapshot trace를 사용하려면 HP, status, fainted, 또는 resource 컬럼 중 하나 이상을 선택해야 합니다.")
+                                    else:
+                                        _bb_log_schema.update({
+                                            "state_trace_enabled": True,
+                                            "state_turn_col": _bb_state_turn_col,
+                                            "state_entity_id_col": _bb_state_id_col,
+                                            "state_hp_col": None if _bb_state_hp_col == "(없음)" else _bb_state_hp_col,
+                                            "state_status_col": None if _bb_state_status_col == "(없음)" else _bb_state_status_col,
+                                            "state_fainted_col": None if _bb_state_fainted_col == "(없음)" else _bb_state_fainted_col,
+                                            "state_hp_mode": _bb_state_hp_mode,
+                                            "state_hp_tolerance": float(_bb_state_hp_tol),
+                                            "state_score_deterministic": bool(_bb_state_deterministic),
+                                            "state_resource_cols": dict(_bb_state_resource_cols),
+                                            "state_resource_mode": _bb_state_resource_mode,
+                                            "state_resource_tolerance": float(_bb_state_resource_tol),
+                                        })
+                                        
+                                if _tc_use:
+                                    if _bb_ent_col == "(없음)":
+                                        st.warning("⚠️ move trace를 사용하려면 참가자 ID 컬럼이 필요합니다.")
+                                    elif _bb_turn_col == "(없음)" or _bb_actor_col == "(없음)" or _bb_target_col == "(없음)" or _bb_move_name_col == "(없음)":
+                                        st.warning("⚠️ move trace를 사용하려면 turn, actor ID, target ID, move name 컬럼을 모두 선택해야 합니다.")
+                                    else:
+                                        _bb_log_schema.update({
+                                            "trace_moves_enabled": True,
+                                            "turn_col": _bb_turn_col,
+                                            "actor_id_col": _bb_actor_col,
+                                            "target_id_col": _bb_target_col,
+                                            "move_name_col": _bb_move_name_col,
+                                            "action_col": None if _bb_action_col == "(없음)" else _bb_action_col,
+                                            "move_action_values": [x.strip() for x in _bb_action_vals.split(",") if x.strip()],
+                                            "move_order_col": None if _bb_move_order == "(없음)" else _bb_move_order,
+                                            "move_order_direction": _bb_move_order_dir,
+                                            "move_power_col": None if _bb_move_pwr == "(없음)" else _bb_move_pwr,
+                                            "move_type_col": None if _bb_move_typ == "(없음)" else _bb_move_typ,
+                                            "move_category_col": None if _bb_move_cat == "(없음)" else _bb_move_cat,
+                                            "move_priority_col": None if _bb_move_pri == "(없음)" else _bb_move_pri,
+                                        })
+                                        
+                                if _ts_use:
+                                    if _bb_ent_col == "(없음)":
+                                        st.warning("⚠️ switch trace를 사용하려면 참가자 ID 컬럼이 필요합니다.")
+                                    elif _bb_switch_turn_col == "(없음)" or _bb_switch_out_col == "(없음)" or _bb_switch_in_col == "(없음)":
+                                        st.warning("⚠️ switch trace를 사용하려면 switch turn, outgoing ID, incoming ID 컬럼을 모두 선택해야 합니다.")
+                                    else:
+                                        _bb_log_schema.update({
+                                            "trace_switches_enabled": True,
+                                            "switch_turn_col": _bb_switch_turn_col,
+                                            "switch_outgoing_id_col": _bb_switch_out_col,
+                                            "switch_incoming_id_col": _bb_switch_in_col,
+                                            "switch_action_col": None if _bb_switch_action_col == "(없음)" else _bb_switch_action_col,
+                                            "switch_action_values": [x.strip() for x in _bb_switch_action_vals.split(",") if x.strip()],
+                                        })
+                                        
+                                if _tf_use:
+                                    if _bb_ent_col == "(없음)":
+                                        st.warning("⚠️ faint incoming trace를 사용하려면 참가자 ID 컬럼이 필요합니다.")
+                                    elif _bb_faint_turn_col == "(없음)" or _bb_faint_out_col == "(없음)" or _bb_faint_in_col == "(없음)":
+                                        st.warning("⚠️ faint incoming trace를 사용하려면 faint turn, outgoing ID, incoming ID 컬럼을 모두 선택해야 합니다.")
+                                    else:
+                                        _bb_log_schema.update({
+                                            "trace_faint_incoming_enabled": True,
+                                            "faint_turn_col": _bb_faint_turn_col,
+                                            "faint_side_col": None if _bb_faint_side_col == "(없음)" else _bb_faint_side_col,
+                                            "faint_outgoing_id_col": _bb_faint_out_col,
+                                            "faint_incoming_id_col": _bb_faint_in_col,
+                                            "faint_action_col": None if _bb_faint_action_col == "(없음)" else _bb_faint_action_col,
+                                            "faint_action_values": [x.strip() for x in _bb_faint_action_vals.split(",") if x.strip()],
+                                        })
+                                        
+                                if _td_use:
+                                    if _bb_ent_col == "(없음)":
+                                        st.warning("⚠️ damage trace를 사용하려면 참가자 ID 컬럼이 필요합니다.")
+                                    elif _bb_damage_turn_col == "(없음)" or _bb_damage_actor_col == "(없음)" or _bb_damage_target_col == "(없음)" or _bb_damage_value_col == "(없음)":
+                                        st.warning("⚠️ damage trace를 사용하려면 damage turn, actor ID, target ID, damage value 컬럼을 모두 선택해야 합니다.")
+                                    else:
+                                        _bb_log_schema.update({
+                                            "damage_trace_enabled": True,
+                                            "damage_turn_col": _bb_damage_turn_col,
+                                            "damage_actor_id_col": _bb_damage_actor_col,
+                                            "damage_target_id_col": _bb_damage_target_col,
+                                            "damage_value_col": _bb_damage_value_col,
+                                            "damage_action_col": None if _bb_damage_action_col == "(없음)" else _bb_damage_action_col,
+                                            "damage_action_values": [x.strip() for x in _bb_damage_action_vals.split(",") if x.strip()],
+                                            "damage_order_col": None if _bb_damage_order_col == "(없음)" else _bb_damage_order_col,
+                                            "damage_order_direction": _bb_damage_order_dir,
+                                            "damage_move_name_col": None if _bb_damage_move_name_col == "(없음)" else _bb_damage_move_name_col,
+                                            "damage_tolerance": float(_bb_damage_tol),
+                                            "damage_value_kind": _bb_damage_value_kind,
+                                        })
+                                        
+                                if _trd_use:
+                                    if _bb_ent_col == "(없음)":
+                                        st.warning("⚠️ resource delta trace를 사용하려면 참가자 ID 컬럼이 필요합니다.")
+                                    elif _bb_resource_delta_turn_col == "(없음)" or _bb_resource_delta_actor_col == "(없음)" or _bb_resource_delta_target_col == "(없음)":
+                                        st.warning("⚠️ resource delta trace를 사용하려면 turn, actor ID, target ID 컬럼을 모두 선택해야 합니다.")
+                                    elif not _bb_resource_delta_cols:
+                                        st.warning("⚠️ resource delta trace를 사용하려면 매핑된 resource loss/delta 컬럼이 1개 이상 필요합니다.")
+                                    else:
+                                        _bb_log_schema.update({
+                                            "resource_delta_trace_enabled": True,
+                                            "resource_delta_turn_col": _bb_resource_delta_turn_col,
+                                            "resource_delta_actor_id_col": _bb_resource_delta_actor_col,
+                                            "resource_delta_target_id_col": _bb_resource_delta_target_col,
+                                            "resource_delta_cols": dict(_bb_resource_delta_cols),
+                                            "resource_delta_action_col": None if _bb_resource_delta_action_col == "(없음)" else _bb_resource_delta_action_col,
+                                            "resource_delta_action_values": [x.strip() for x in _bb_resource_delta_action_vals.split(",") if x.strip()],
+                                            "resource_delta_order_col": None if _bb_resource_delta_order_col == "(없음)" else _bb_resource_delta_order_col,
+                                            "resource_delta_order_direction": _bb_resource_delta_order_dir,
+                                            "resource_delta_tolerance": float(_bb_resource_delta_tol),
+                                            "resource_delta_strict_extra": bool(_bb_resource_delta_strict_extra),
+                                        })
+                            else:
+                                st.warning("전투 ID 컬럼과 팀/진영 컬럼을 모두 선택해야 DB 역할 컬럼 방식으로 실행할 수 있습니다.")
+
+                        if _bb_method == "DB 역할 컬럼으로 묶기" and _bb_log_schema:
+                            try:
+                                _export_payload = _build_db_corpus_schema_payload(
+                                    sys_stats, sys_gimmicks, _bb_health, _bb_target, int(_bb_size), _bb_log_schema, st.session_state
+                                )
+                                _export_json_str = json.dumps(_export_payload, ensure_ascii=False, indent=2)
+                                st.download_button(
+                                    label="DB 코퍼스 schema JSON 다운로드",
+                                    data=_export_json_str,
+                                    file_name="db_corpus_schema.json",
+                                    mime="application/json",
+                                    use_container_width=True
+                                )
+                                st.session_state["bb_last_corpus_schema"] = _export_payload
+                                st.session_state["bb_last_log_schema"] = _bb_log_schema
+                            except Exception as e:
+                                st.error(f"schema JSON 생성 중 오류: {str(e)}")
+
+                        if st.button("🔬 백테스트 실행", use_container_width=True, key="run_backtest", disabled=(_bb_method == "DB 역할 컬럼으로 묶기" and not _bb_log_schema)):
                             from modules.per_battle_backtest import build_battles, score_predictions
                             from modules.engine import _worker_simulate_match
+                            import copy
+                            
+                            _bb_gc = copy.deepcopy(st.session_state.get("game_config") or {})
+                            if _bb_log_schema and _bb_log_schema.get("entity_id_col"):
+                                _bb_gc["preserve_ids"] = True
 
                             _battles = build_battles(
                                 _bb_df, int(_bb_size), _bb_target,
@@ -955,6 +1526,8 @@ def render_dashboard():
                                 move_library=st.session_state.get("move_library"),
                                 resource_config=st.session_state.get("resource_config"),
                                 max_battles=int(_bb_max),
+                                game_config=_bb_gc,
+                                log_schema=_bb_log_schema,
                             )
 
                             if not _battles:
@@ -963,7 +1536,6 @@ def render_dashboard():
                                 _bb_cf = st.session_state.get("combat_flow", DEFAULT_COMBAT_FLOW)
                                 _bb_spd = st.session_state.get("speed_stat")
                                 _bb_gf = st.session_state.get("global_damage_formula", "0")
-                                _bb_gc = st.session_state.get("game_config")
                                 _bb_mt = int(st.session_state.get("sim_max_turns", 100))
                                 _bb_rm = ResourceModule(
                                     st.session_state.get("resource_config") or None,
@@ -972,11 +1544,22 @@ def render_dashboard():
 
                                 _bb_tasks = []
                                 _bb_actuals = []
-                                for _bb_i, (_a_team, _e_team, _ally_wins) in enumerate(_battles):
+                                _bb_stochasticity_factory = _select_backtest_stochasticity_factory(_bb_log_schema)
+                                for _bb_i, _battle in enumerate(_battles):
+                                    if len(_battle) == 4:
+                                        _a_team, _e_team, _ally_wins, _battle_gc = _battle
+                                    else:
+                                        _a_team, _e_team, _ally_wins = _battle
+                                        _battle_gc = None
+
+                                    _task_gc = copy.deepcopy(_bb_gc)
+                                    if _battle_gc:
+                                        _task_gc.update(_battle_gc)
+
                                     _bb_tasks.append((
                                         _a_team, _e_team, _bb_cf, _bb_spd, sys_stats, _bb_gf,
-                                        _bb_mt, default_stochasticity_factory, _bb_rm,
-                                        None, None, None, None, _bb_gc, _bb_i,
+                                        _bb_mt, _bb_stochasticity_factory, _bb_rm,
+                                        None, None, None, None, _task_gc, _bb_i,
                                     ))
                                     _bb_actuals.append(_ally_wins)
 
@@ -985,8 +1568,12 @@ def render_dashboard():
                                 _bb_status = st.empty()
                                 _bb_t0 = time.time()
                                 _bb_predictions = []
+                                _bb_state_scores = []
+                                _bb_action_damage_scores = []
+                                _bb_action_resource_delta_scores = []
                                 _bb_errors = 0
                                 _bb_workers = os.cpu_count() or 4
+                                _bb_mismatch_rows = []
 
                                 with st.spinner(f"백테스트 실행 중... ({_bb_total}전투, 멀티코어 병렬)"):
                                     with concurrent.futures.ProcessPoolExecutor(
@@ -994,11 +1581,26 @@ def render_dashboard():
                                         _bb_step = max(1, _bb_total // 50)
                                         for _bb_r in _bb_pool.map(
                                                 _worker_simulate_match, _bb_tasks, chunksize=4):
+                                            _bb_idx = len(_bb_predictions) + 1
                                             if isinstance(_bb_r, str):
                                                 _bb_errors += 1
                                                 _bb_predictions.append(False)
+                                                _bb_mismatch_rows.append({
+                                                    "battle_index": _bb_idx,
+                                                    "score_type": "engine_error",
+                                                    "actual_full": repr(_bb_r)
+                                                })
                                             else:
                                                 _bb_predictions.append(_bb_r[0] == 1)
+                                                _metrics = _bb_r[1] if len(_bb_r) > 1 else {}
+                                                if isinstance(_metrics, dict):
+                                                    if _metrics.get("state_score"):
+                                                        _bb_state_scores.append(_metrics["state_score"])
+                                                    if _metrics.get("action_damage_score"):
+                                                        _bb_action_damage_scores.append(_metrics["action_damage_score"])
+                                                    if _metrics.get("action_resource_delta_score"):
+                                                        _bb_action_resource_delta_scores.append(_metrics["action_resource_delta_score"])
+                                                    _extend_mismatch_rows_from_metrics(_bb_mismatch_rows, _bb_idx, _metrics)
                                             _bb_done = len(_bb_predictions)
                                             if _bb_done % _bb_step == 0 or _bb_done == _bb_total:
                                                 _bb_prog.progress(min(1.0, _bb_done / float(_bb_total)))
@@ -1050,6 +1652,126 @@ def render_dashboard():
                                     "이론적 천장(난수 4.2%), 71.6%는 무브/타입 도입 전 Pokemon best-effort, "
                                     "50%는 동전 던지기. 50%대면 매핑/공식부터 점검하세요."
                                 )
+                                
+                                if _bb_log_schema and _bb_log_schema.get("state_trace_enabled"):
+                                    if _bb_log_schema.get("state_score_deterministic", True):
+                                        st.caption("state score는 결정론 모드(NoVariance)로 계산되었습니다.")
+                                    else:
+                                        st.caption("state score는 현재 stochasticity 설정을 포함해 계산되었습니다.")
+                                        
+                                if _bb_state_scores:
+                                    _s_checks = sum(int(s.get("checks", 0) or 0) for s in _bb_state_scores)
+                                    _s_mismatch = sum(int(s.get("mismatches", 0) or 0) for s in _bb_state_scores)
+                                    _s_acc = (1.0 - (_s_mismatch / _s_checks)) * 100.0 if _s_checks > 0 else 0.0
+                                    
+                                    _s_hp_miss = sum(int(s.get("hp_mismatches", 0) or 0) for s in _bb_state_scores)
+                                    _s_st_miss = sum(int(s.get("status_mismatches", 0) or 0) for s in _bb_state_scores)
+                                    _s_ft_miss = sum(int(s.get("faint_mismatches", 0) or 0) for s in _bb_state_scores)
+                                    _s_res_miss = sum(int(s.get("resource_mismatches", 0) or 0) for s in _bb_state_scores)
+                                    _s_missing = sum(int(s.get("missing", 0) or 0) for s in _bb_state_scores)
+                                    
+                                    st.divider()
+                                    st.markdown("### 📊 관측 상태 스냅샷 일치율")
+                                    _sc1, _sc2, _sc3, _sc4 = st.columns(4)
+                                    with _sc1:
+                                        st.metric("상태 일치율", f"{_s_acc:.1f}%", f"{_s_checks - _s_mismatch}/{_s_checks} 검사")
+                                    with _sc2:
+                                        st.metric("HP 불일치", f"{_s_hp_miss}건", delta_color="off")
+                                    with _sc3:
+                                        st.metric("상태/기절 불일치", f"{_s_st_miss + _s_ft_miss}건", delta_color="off")
+                                    with _sc4:
+                                        st.metric("자원 불일치", f"{_s_res_miss}건", delta_color="off")
+                                        
+                                    _s_first = next((s.get("first_mismatch") for s in _bb_state_scores if s.get("first_mismatch")), None)
+                                    if _s_first:
+                                        st.caption(f"**첫 번째 불일치 샘플:** Turn {_s_first.get('turn')} - {_s_first.get('id')} ({_s_first.get('kind')}) expected: {_s_first.get('expected')}, actual: {_s_first.get('actual')}")
+                                    if _s_missing > 0:
+                                        st.caption(f"⚠️ 엔진에서 찾을 수 없는 참가자 상태 누락: {_s_missing}건")
+
+                                if _bb_action_damage_scores:
+                                    _d_checks = sum(int(s.get("checks", 0) or 0) for s in _bb_action_damage_scores)
+                                    _d_mismatch = sum(int(s.get("mismatches", 0) or 0) for s in _bb_action_damage_scores)
+                                    _d_acc = (1.0 - (_d_mismatch / _d_checks)) * 100.0 if _d_checks > 0 else 0.0
+                                    
+                                    _d_id_miss = sum(int(s.get("identity_mismatches", 0) or 0) for s in _bb_action_damage_scores)
+                                    _d_dmg_miss = sum(int(s.get("damage_mismatches", 0) or 0) for s in _bb_action_damage_scores)
+                                    _d_missing = sum(int(s.get("missing", 0) or 0) for s in _bb_action_damage_scores)
+                                    _d_extra = sum(int(s.get("extra", 0) or 0) for s in _bb_action_damage_scores)
+                                    
+                                    st.divider()
+                                    st.markdown("### 💥 관측 데미지 일치율")
+                                    _dc1, _dc2, _dc3, _dc4 = st.columns(4)
+                                    with _dc1:
+                                        st.metric("행동 데미지 일치율", f"{_d_acc:.1f}%", f"{_d_checks - _d_mismatch}/{_d_checks} 검사")
+                                    with _dc2:
+                                        st.metric("damage 불일치", f"{_d_dmg_miss}건", delta_color="off")
+                                    with _dc3:
+                                        st.metric("actor/target 불일치", f"{_d_id_miss}건", delta_color="off")
+                                    with _dc4:
+                                        st.metric("누락/추가 이벤트", f"{_d_missing}/{_d_extra}건", delta_color="off")
+                                        
+                                    _d_first = next((s.get("first_mismatch") for s in _bb_action_damage_scores if s.get("first_mismatch")), None)
+                                    if _d_first:
+                                        st.caption(f"**첫 번째 불일치 샘플:** Turn {_d_first.get('turn')} - {_d_first.get('id')} ({_d_first.get('kind')}) expected: {_d_first.get('expected')}, actual: {_d_first.get('actual')}")
+
+                                if _bb_action_resource_delta_scores:
+                                    _rd_checks = sum(int(s.get("checks", 0) or 0) for s in _bb_action_resource_delta_scores)
+                                    _rd_mismatch = sum(int(s.get("mismatches", 0) or 0) for s in _bb_action_resource_delta_scores)
+                                    _rd_acc = (1.0 - (_rd_mismatch / _rd_checks)) * 100.0 if _rd_checks > 0 else 0.0
+                                    
+                                    _rd_id_miss = sum(int(s.get("identity_mismatches", 0) or 0) for s in _bb_action_resource_delta_scores)
+                                    _rd_delta_miss = sum(int(s.get("delta_mismatches", 0) or 0) for s in _bb_action_resource_delta_scores)
+                                    _rd_missing = sum(int(s.get("missing", 0) or 0) for s in _bb_action_resource_delta_scores)
+                                    _rd_extra = sum(int(s.get("extra", 0) or 0) for s in _bb_action_resource_delta_scores)
+                                    
+                                    st.divider()
+                                    st.markdown("### 💠 자원 delta 일치율")
+                                    _rdc1, _rdc2, _rdc3, _rdc4 = st.columns(4)
+                                    with _rdc1:
+                                        st.metric("자원 delta 일치율", f"{_rd_acc:.1f}%", f"{_rd_checks - _rd_mismatch}/{_rd_checks} 검사")
+                                    with _rdc2:
+                                        st.metric("delta 불일치", f"{_rd_delta_miss}건", delta_color="off")
+                                    with _rdc3:
+                                        st.metric("identity 불일치", f"{_rd_id_miss}건", delta_color="off")
+                                    with _rdc4:
+                                        st.metric("누락/추가 이벤트", f"{_rd_missing}/{_rd_extra}건", delta_color="off")
+                                        
+                                    _rd_first = next((s.get("first_mismatch") for s in _bb_action_resource_delta_scores if s.get("first_mismatch")), None)
+                                    if _rd_first:
+                                        st.caption(f"**첫 번째 불일치 샘플:** Turn {_rd_first.get('turn')} - {_rd_first.get('id')} ({_rd_first.get('kind')}) expected: {_rd_first.get('expected')}, actual: {_rd_first.get('actual')}")
+
+                                st.session_state["bb_last_backtest_has_run"] = True
+                                st.session_state["bb_last_mismatch_rows"] = list(_bb_mismatch_rows)
+                                st.session_state["bb_last_backtest_summary"] = {
+                                    "total": _bb_sc["total"],
+                                    "correct": _bb_sc["correct"],
+                                    "accuracy_pct": _bb_acc_pct,
+                                    "elapsed": _bb_elapsed,
+                                    "errors": _bb_errors,
+                                }
+
+                        if st.session_state.get("bb_last_backtest_has_run"):
+                            _cached_rows = st.session_state.get("bb_last_mismatch_rows", [])
+                            st.divider()
+                            st.markdown("### 📋 Mismatch Report")
+                            if _cached_rows:
+                                _df_miss = pd.DataFrame(_cached_rows)
+                                st.dataframe(_df_miss, use_container_width=True)
+                                st.download_button(
+                                    label="📥 Mismatch Report CSV 다운로드",
+                                    data=_df_miss.to_csv(index=False).encode("utf-8-sig"),
+                                    file_name="mismatch_report.csv",
+                                    mime="text/csv",
+                                )
+                            else:
+                                st.success("🎉 최근 score mismatch가 없습니다!")
+
+                            with st.expander("메커니즘 RE / EFFECTS 후보 생성", expanded=bool(_cached_rows)):
+                                try:
+                                    from modules.step_mechanism_re import render_mechanism_re
+                                    render_mechanism_re()
+                                except Exception as e:
+                                    st.warning(f"Mechanism RE surface 로드 실패: {e}")
 
     with tab2:
         st.markdown("## 🛠️ Global Character Builder")
@@ -1133,6 +1855,7 @@ def render_dashboard():
 
                 def _opt_build_inst(name, stat_dict, gimmick_dict):
                     inst = {"name": str(name), "gimmicks": dict(gimmick_dict)}
+                    promote_effect_keys(inst, _gc)
                     for s in sys_stats:
                         inst[s] = _opt_coerce(stat_dict.get(s, 0.0))
                     inst['resources'] = {}
@@ -1324,25 +2047,6 @@ def render_dashboard():
                 st.success(f"✅ '{char_name}' 저장 완료!")
                 
 
-    # ── D5 Phase A: Weight-Driven Dynamic Dashboard (D4 설계안 §8) ──
-    # 기존 dashboard 섹션과 *공존*. 사용자가 로그 업로드 시 자동 감지로 컴포넌트 가변.
-    # 사이드바 가중치 슬라이더로 미세조정. 데이터 기반 시연용 (실제 시뮬 통합은 D7~D8).
-    try:
-        st.divider()
-        st.markdown("## 🎛️ 가중치 기반 동적 Dashboard (D5 신규)")
-        st.caption(
-            "로그의 컬럼 구성에 따라 컴포넌트가 자동으로 활성/비활성됩니다. "
-            "사이드바의 게임 preset 버튼과 컴포넌트 가중치 슬라이더로 화면을 미세조정하세요."
-        )
-        _df_for_dashboard = st.session_state.get('df')
-        if _df_for_dashboard is not None and len(_df_for_dashboard) > 0:
-            _state_dict = build_mock_state_from_log(_df_for_dashboard)
-            _active = list(_state_dict.keys())
-            _weights = render_weight_panel(_active)
-            render_dynamic_dashboard(_state_dict, _weights)
-        else:
-            st.info("Step 1에서 로그를 업로드하면 가변 dashboard가 활성화됩니다.")
-    except Exception as _wddash_err:
-        st.warning(f"신규 dashboard 오류 (기존 화면에는 영향 없음): {_wddash_err}")
+
 
     return True, ""
