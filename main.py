@@ -23,9 +23,9 @@ if 'current_step' not in st.session_state:
 if 'character_library' not in st.session_state:
     st.session_state['character_library'] = {}
 if 'ally_team' not in st.session_state:
-    st.session_state['ally_team'] = [None] * 4
+    st.session_state['ally_team'] = []
 if 'enemy_team' not in st.session_state:
-    st.session_state['enemy_team'] = [None] * 4
+    st.session_state['enemy_team'] = []
 if 'system_stats' not in st.session_state:
     st.session_state['system_stats'] = []
 

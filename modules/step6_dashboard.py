@@ -202,7 +202,7 @@ def get_default_df(team_keys):
     data = []
     sys_stats = st.session_state.get('system_stats', [])
     sys_gimmicks = st.session_state.get('system_gimmicks', [])
-    for i in range(4):
+    for i in range(len(team_keys)):
         hero_name = team_keys[i] if i < len(team_keys) else "비어 있음"
         row_dict = {"Hero": hero_name}
         if hero_name and hero_name != "비어 있음" and hero_name in st.session_state.get('character_library', {}):
@@ -595,13 +595,15 @@ def render_dashboard():
             
         all_heroes = ["비어 있음"] + list(st.session_state.get('character_library', {}).keys())
         
+        party_size = st.session_state.get('party_size', 4)
+        
         if 'ally_df' not in st.session_state or 'enemy_df' not in st.session_state:
             available_heroes = [h for h in all_heroes if h != "비어 있음"]
-            default_ally_keys = (available_heroes * 4)[:4] if available_heroes else ["비어 있음"] * 4
-            default_enemy_keys = (available_heroes[4:] + available_heroes * 4)[:4] if available_heroes else ["비어 있음"] * 4
+            default_ally_keys = (available_heroes * party_size)[:party_size] if available_heroes else ["비어 있음"] * party_size
+            default_enemy_keys = (available_heroes[party_size:] + available_heroes * party_size)[:party_size] if available_heroes else ["비어 있음"] * party_size
             
-            ally_keys = [st.session_state.get(f"Ally_slot_{i}_select", default_ally_keys[i]) for i in range(4)]
-            enemy_keys = [st.session_state.get(f"Enemy_slot_{i}_select", default_enemy_keys[i]) for i in range(4)]
+            ally_keys = [st.session_state.get(f"Ally_slot_{i}_select", default_ally_keys[i]) for i in range(party_size)]
+            enemy_keys = [st.session_state.get(f"Enemy_slot_{i}_select", default_enemy_keys[i]) for i in range(party_size)]
             
             if st.session_state.get("structured_package_mode") and "db_corpus_raw_tables" in st.session_state:
                 rosters_df = st.session_state["db_corpus_raw_tables"].get("battle_roster_pokemon")
@@ -617,16 +619,16 @@ def render_dashboard():
                         ally_sample = sample_roster[sample_roster['player'] == players[0]]
                         enemy_sample = sample_roster[sample_roster['player'] == players[1]]
                     else:
-                        ally_sample = sample_roster.head(min(4, len(sample_roster)))
-                        enemy_sample = sample_roster.iloc[len(ally_sample):len(ally_sample)+4]
+                        ally_sample = sample_roster.head(min(party_size, len(sample_roster)))
+                        enemy_sample = sample_roster.iloc[len(ally_sample):len(ally_sample)+party_size]
                         
                     def get_key(row):
                         k = row.get("species", row.get("name", "비어 있음"))
                         if pd.isna(k) or k == "nan": return "비어 있음"
                         return str(k)
                         
-                    ally_keys = [get_key(ally_sample.iloc[i]) if i < len(ally_sample) else "비어 있음" for i in range(4)]
-                    enemy_keys = [get_key(enemy_sample.iloc[i]) if i < len(enemy_sample) else "비어 있음" for i in range(4)]
+                    ally_keys = [get_key(ally_sample.iloc[i]) if i < len(ally_sample) else "비어 있음" for i in range(party_size)]
+                    enemy_keys = [get_key(enemy_sample.iloc[i]) if i < len(enemy_sample) else "비어 있음" for i in range(party_size)]
                     
             st.session_state['ally_df'] = get_default_df(ally_keys)
             st.session_state['enemy_df'] = get_default_df(enemy_keys)
@@ -634,6 +636,14 @@ def render_dashboard():
         if col_input is not None:
             with col_input:
                 st.markdown("### ⚔️ 조작부: 파티 편성 및 스탯 조정")
+                
+                new_party_size = st.number_input("파티 칸 수", min_value=1, max_value=6, value=party_size, step=1, key="party_size_input")
+                if new_party_size != party_size:
+                    st.session_state['party_size'] = new_party_size
+                    if 'ally_df' in st.session_state: del st.session_state['ally_df']
+                    if 'enemy_df' in st.session_state: del st.session_state['enemy_df']
+                    st.rerun()
+                
                 def calc_char_value(row, weights):
                     if row["Hero"] == "비어 있음" or pd.isna(row["Hero"]): return 0.0
                     val = 0.0

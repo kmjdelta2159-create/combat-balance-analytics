@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 import itertools
+import io
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LogisticRegression
@@ -66,6 +67,74 @@ def _apply_tag_mapping(df, gimmick_cols, tag_mapping):
         if col_map and g in df_mapped.columns:
             df_mapped[g] = df_mapped[g].map(lambda v: col_map.get(str(v), str(v)))
     return df_mapped
+
+def _neutral_type_table(type_roster):
+    return pd.DataFrame(1.0, index=type_roster, columns=type_roster)
+
+def _pokemon_type_table(type_roster):
+    """Pokemon-style type effectiveness preset. Unknown/custom types stay neutral."""
+    table = _neutral_type_table(type_roster)
+    chart = {
+        "Normal": {"Rock": 0.5, "Ghost": 0.0, "Steel": 0.5},
+        "Fire": {"Fire": 0.5, "Water": 0.5, "Grass": 2.0, "Ice": 2.0, "Bug": 2.0, "Rock": 0.5, "Dragon": 0.5, "Steel": 2.0},
+        "Water": {"Fire": 2.0, "Water": 0.5, "Grass": 0.5, "Ground": 2.0, "Rock": 2.0, "Dragon": 0.5},
+        "Electric": {"Water": 2.0, "Electric": 0.5, "Grass": 0.5, "Ground": 0.0, "Flying": 2.0, "Dragon": 0.5},
+        "Grass": {"Fire": 0.5, "Water": 2.0, "Grass": 0.5, "Poison": 0.5, "Ground": 2.0, "Flying": 0.5, "Bug": 0.5, "Rock": 2.0, "Dragon": 0.5, "Steel": 0.5},
+        "Ice": {"Fire": 0.5, "Water": 0.5, "Grass": 2.0, "Ice": 0.5, "Ground": 2.0, "Flying": 2.0, "Dragon": 2.0, "Steel": 0.5},
+        "Fighting": {"Normal": 2.0, "Ice": 2.0, "Poison": 0.5, "Flying": 0.5, "Psychic": 0.5, "Bug": 0.5, "Rock": 2.0, "Ghost": 0.0, "Dark": 2.0, "Steel": 2.0, "Fairy": 0.5},
+        "Poison": {"Grass": 2.0, "Poison": 0.5, "Ground": 0.5, "Rock": 0.5, "Ghost": 0.5, "Steel": 0.0, "Fairy": 2.0},
+        "Ground": {"Fire": 2.0, "Electric": 2.0, "Grass": 0.5, "Poison": 2.0, "Flying": 0.0, "Bug": 0.5, "Rock": 2.0, "Steel": 2.0},
+        "Flying": {"Electric": 0.5, "Grass": 2.0, "Fighting": 2.0, "Bug": 2.0, "Rock": 0.5, "Steel": 0.5},
+        "Psychic": {"Fighting": 2.0, "Poison": 2.0, "Psychic": 0.5, "Dark": 0.0, "Steel": 0.5},
+        "Bug": {"Fire": 0.5, "Grass": 2.0, "Fighting": 0.5, "Poison": 0.5, "Flying": 0.5, "Psychic": 2.0, "Ghost": 0.5, "Dark": 2.0, "Steel": 0.5, "Fairy": 0.5},
+        "Rock": {"Fire": 2.0, "Ice": 2.0, "Fighting": 0.5, "Ground": 0.5, "Flying": 2.0, "Bug": 2.0, "Steel": 0.5},
+        "Ghost": {"Normal": 0.0, "Psychic": 2.0, "Ghost": 2.0, "Dark": 0.5},
+        "Dragon": {"Dragon": 2.0, "Steel": 0.5, "Fairy": 0.0},
+        "Dark": {"Fighting": 0.5, "Psychic": 2.0, "Ghost": 2.0, "Dark": 0.5, "Fairy": 0.5},
+        "Steel": {"Fire": 0.5, "Water": 0.5, "Electric": 0.5, "Ice": 2.0, "Rock": 2.0, "Steel": 0.5, "Fairy": 2.0},
+        "Fairy": {"Fire": 0.5, "Fighting": 2.0, "Poison": 0.5, "Dragon": 2.0, "Dark": 2.0, "Steel": 0.5},
+    }
+    for atk, row in chart.items():
+        if atk not in table.index:
+            continue
+        for defense, mult in row.items():
+            if defense in table.columns:
+                table.loc[atk, defense] = mult
+    return table
+
+def _parse_type_table_text(raw_text, type_roster):
+    """Parse pasted CSV/TSV type table and align it to the current type roster."""
+    raw_text = (raw_text or "").strip()
+    if not raw_text:
+        return None, "붙여넣을 표가 비어 있습니다."
+    try:
+        parsed = pd.read_csv(io.StringIO(raw_text), sep=None, engine="python")
+    except Exception as exc:
+        return None, f"표 파싱 실패: {exc}"
+
+    if parsed.empty:
+        return None, "표에서 데이터를 찾지 못했습니다."
+
+    first_col = parsed.columns[0]
+    first_values = parsed[first_col].astype(str).tolist()
+    has_row_labels = any(v in type_roster for v in first_values) or str(first_col).lower().startswith("unnamed")
+    if has_row_labels:
+        parsed = parsed.set_index(first_col)
+    elif parsed.shape == (len(type_roster), len(type_roster)):
+        parsed.index = type_roster
+        parsed.columns = type_roster
+
+    result = _neutral_type_table(type_roster)
+    for atk in type_roster:
+        if atk not in parsed.index:
+            continue
+        for defense in type_roster:
+            if defense not in parsed.columns:
+                continue
+            val = pd.to_numeric(parsed.loc[atk, defense], errors="coerce")
+            if pd.notnull(val):
+                result.loc[atk, defense] = float(val)
+    return result, None
 
 def _render_game_profile_panel(game_profile):
     """Phase 6 — 탐지된 모듈 표시 + 모듈별 수동 오버라이드(Auto/ON/OFF) 패널."""
@@ -469,13 +538,14 @@ def render_system_definition():
         with tabs[2]:
             st.markdown("## ⚙️ 선택 규칙")
             st.caption("아래 항목은 모두 선택(고급 설정)입니다.")
-            with st.expander("🎯 Move System (무브/어빌리티)", expanded=False):
-                move_library_edited = None
-                move_categories_cfg = {}
-                move_type_table_edited = None
-                move_type_columns = []
-                move_stab_factor = 1.0
+            move_library_edited = None
+            move_categories_cfg = {}
+            move_type_table_edited = None
+            move_type_columns = []
+            move_stab_factor = 1.0
+            _moves_for_type_table = []
 
+            with st.expander("🎯 Move System (무브/어빌리티)", expanded=False):
                 # ── attack_log 진입 경로 — Step 1에서 업로드됨 ──
                 attack_log_df = st.session_state.get("attack_log_df")
                 if attack_log_df is not None:
@@ -517,6 +587,7 @@ def render_system_definition():
                         _ncol if _ncol != "(없음)" else None,
                         _prcol if _prcol != "(없음)" else None,
                     )
+                    _moves_for_type_table = _moves
                     if _moves:
                         st.caption(f"✅ {len(_moves)}개 무브 추출됨 — 표에서 직접 수정 가능:")
                         move_library_edited = st.data_editor(
@@ -536,36 +607,74 @@ def render_system_definition():
                                 move_categories_cfg[_cat] = {"offense": _off, "defense": _def}
                         elif not base_stats:
                             st.warning("⚠️ 카테고리 라우팅 설정 전에 Base Stats를 먼저 선택하세요.")
-
-                        # ── Phase 8b: 타입 상성표 + STAB ──
-                        with st.expander("🔯 타입 상성표", expanded=False):
-                            _type_col_default = [g for g in gimmicks
-                                                 if 'type' in g.lower() or '타입' in g or '속성' in g]
-                            move_type_columns = st.multiselect(
-                                "캐릭터 타입이 든 기믹 컬럼 (방어 상성·STAB 판정에 사용)",
-                                gimmicks, default=_type_col_default, key="ui_move_type_columns")
-                            _move_types = {str(m.get("type", "")) for m in _moves
-                                           if str(m.get("type", "")).strip()}
-                            _gimmick_types = {str(v) for c in move_type_columns
-                                              for v in df[c].dropna().astype(str).unique()}
-                            _type_roster = sorted(_move_types | _gimmick_types)
-                            if _type_roster:
-                                st.caption(f"{len(_type_roster)}개 타입 — 공격(행) × 방어(열) 배율표. "
-                                           f"기본값 1.0(무영향)이니 **효과적(2.0)·반감(0.5)·무효(0.0)인 칸만** "
-                                           f"바꾸면 됩니다.")
-                                _tt_init = pd.DataFrame(1.0, index=_type_roster, columns=_type_roster)
-                                move_type_table_edited = st.data_editor(
-                                    _tt_init, use_container_width=True, height=320, key="ui_type_table_editor")
-                                move_stab_factor = st.number_input(
-                                    "STAB 배율 (무브 타입 == 공격자 타입 시 추가 배율, 1.0 = STAB 없음)",
-                                    min_value=1.0, max_value=3.0, value=1.0, step=0.1, key="ui_stab_factor")
-                            else:
-                                st.caption("타입 정보가 없어 상성표를 만들 수 없습니다.")
                     else:
                         st.caption("추출된 무브가 없습니다 — 무브 컬럼 선택을 확인하세요.")
                 else:
                     st.caption("로그에 무브 컬럼(위력/타입/카테고리)이 없습니다 — 무브 시스템 비활성. "
                                "단일 데미지 공식으로 동작합니다.")
+
+            # ── Phase 8b: 타입 상성표 + STAB ──
+            with st.expander("🔯 타입 상성표 / STAB", expanded=False):
+                _type_col_default = [g for g in gimmicks
+                                     if 'type' in g.lower() or '타입' in g or '속성' in g]
+                move_type_columns = st.multiselect(
+                    "캐릭터 타입이 든 기믹 컬럼 (방어 상성·STAB 판정에 사용)",
+                    gimmicks, default=_type_col_default, key="ui_move_type_columns")
+                _move_types = {str(m.get("type", "")) for m in _moves_for_type_table
+                               if str(m.get("type", "")).strip()}
+                _gimmick_types = {str(v) for c in move_type_columns
+                                  for v in df[c].dropna().astype(str).unique()}
+                _type_roster = sorted(_move_types | _gimmick_types)
+                if _type_roster:
+                    st.caption(f"{len(_type_roster)}개 타입 — 공격(행) × 방어(열) 배율표. "
+                               f"기본값 1.0(무영향)이니 **효과적(2.0)·반감(0.5)·무효(0.0)인 칸만** "
+                               f"바꾸면 됩니다.")
+
+                    _type_sig = tuple(_type_roster)
+                    if st.session_state.get("ui_type_table_signature") != _type_sig:
+                        st.session_state["ui_type_table_signature"] = _type_sig
+                        st.session_state["ui_type_table_df"] = _neutral_type_table(_type_roster)
+                        st.session_state["ui_type_table_version"] = st.session_state.get("ui_type_table_version", 0) + 1
+
+                    _preset_col, _reset_col = st.columns(2)
+                    with _preset_col:
+                        if st.button("포켓몬 타입 상성 프리셋 적용", use_container_width=True, key="ui_apply_pokemon_type_chart"):
+                            st.session_state["ui_type_table_df"] = _pokemon_type_table(_type_roster)
+                            st.session_state["ui_type_table_version"] = st.session_state.get("ui_type_table_version", 0) + 1
+                    with _reset_col:
+                        if st.button("전부 1.0으로 초기화", use_container_width=True, key="ui_reset_type_chart"):
+                            st.session_state["ui_type_table_df"] = _neutral_type_table(_type_roster)
+                            st.session_state["ui_type_table_version"] = st.session_state.get("ui_type_table_version", 0) + 1
+
+                    with st.expander("표 붙여넣기 (CSV/TSV)", expanded=False):
+                        st.caption("Excel/구글시트에서 공격 타입 행과 방어 타입 열을 포함한 표를 복사해 붙여넣고 적용하세요.")
+                        _raw_type_table = st.text_area(
+                            "상성표 붙여넣기",
+                            height=160,
+                            placeholder="첫 열=공격 타입, 첫 행=방어 타입. 값은 0, 0.5, 1, 2 형식",
+                            key="ui_type_table_paste",
+                        )
+                        if st.button("붙여넣은 표 적용", use_container_width=True, key="ui_apply_pasted_type_chart"):
+                            _parsed_table, _parse_error = _parse_type_table_text(_raw_type_table, _type_roster)
+                            if _parse_error:
+                                st.error(_parse_error)
+                            else:
+                                st.session_state["ui_type_table_df"] = _parsed_table
+                                st.session_state["ui_type_table_version"] = st.session_state.get("ui_type_table_version", 0) + 1
+                                st.success("붙여넣은 상성표를 적용했습니다.")
+
+                    _tt_init = st.session_state.get("ui_type_table_df", _neutral_type_table(_type_roster))
+                    move_type_table_edited = st.data_editor(
+                        _tt_init,
+                        use_container_width=True,
+                        height=320,
+                        key=f"ui_type_table_editor_{st.session_state.get('ui_type_table_version', 0)}")
+                    st.session_state["ui_type_table_df"] = move_type_table_edited
+                    move_stab_factor = st.number_input(
+                        "STAB 배율 (무브 타입 == 공격자 타입 시 추가 배율, 1.0 = STAB 없음)",
+                        min_value=1.0, max_value=3.0, value=1.0, step=0.1, key="ui_stab_factor")
+                else:
+                    st.caption("무브 타입 또는 캐릭터 타입 컬럼을 선택하면 상성표를 만들 수 있습니다.")
 
             # Tag Normalization
             with st.expander("🏷️ Tag Dictionary Mapping (태그 정규화)", expanded=False):
