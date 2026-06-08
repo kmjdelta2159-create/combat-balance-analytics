@@ -1,0 +1,3 @@
+input_path,input_kind,status,battle_count,event_count,participant_count,move_count,state_event_count,damage_event_count,winner_sides_count,roster_only_entities_count,unknown_damage_actor_count,rows,accuracy_pct,outcome_mismatches,state_checks,state_mismatches,next_action,first_mismatch_turn,first_mismatch_id,first_mismatch_kind,first_mismatch_expected,first_mismatch_actual,error
+.codex_tmp/adapt8_multi_battle_replay/pokemon_showdown_multi.db,replicated_fixture,ran,2,686,24,72,244,108,2,0,58,448,100.0,0,234,0,passed_or_low_mismatch,,,,,,
+.codex_tmp/adapt8_multi_battle_replay/input_zip.zip,replicated_fixture,ran,2,686,24,72,244,108,2,0,58,448,100.0,0,234,0,passed_or_low_mismatch,,,,,,

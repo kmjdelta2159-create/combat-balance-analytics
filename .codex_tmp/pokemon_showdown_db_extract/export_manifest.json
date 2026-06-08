@@ -1,0 +1,92 @@
+{
+  "export_name": "pokemon_showdown_db_extract",
+  "source_file": "Gen5OU-2015-05-11-reymedy-leftiez.html",
+  "source_system": "pokemon_showdown_replay_html",
+  "exported_at": "2026-06-08T03:17:27+09:00",
+  "battle_id": "smogtours-gen5ou-59402",
+  "tables": {
+    "battles": {
+      "rows": 1,
+      "columns": [
+        "battle_id",
+        "source_system",
+        "source_replay_id",
+        "title",
+        "game_type",
+        "generation",
+        "tier",
+        "winner_side",
+        "winner_name",
+        "total_turns",
+        "imported_at"
+      ],
+      "file": "battles.csv"
+    },
+    "battle_players": {
+      "rows": 2,
+      "columns": [
+        "player_id",
+        "battle_id",
+        "side",
+        "username",
+        "avatar"
+      ],
+      "file": "battle_players.csv"
+    },
+    "battle_rules": {
+      "rows": 8,
+      "columns": [
+        "battle_id",
+        "rule_order",
+        "rule_name",
+        "rule_description"
+      ],
+      "file": "battle_rules.csv"
+    },
+    "battle_roster_pokemon": {
+      "rows": 12,
+      "columns": [
+        "roster_id",
+        "battle_id",
+        "side",
+        "slot_index",
+        "species",
+        "gender",
+        "raw_pokemon_text"
+      ],
+      "file": "battle_roster_pokemon.csv"
+    },
+    "battle_events": {
+      "rows": 343,
+      "columns": [
+        "event_id",
+        "battle_id",
+        "seq",
+        "turn_no",
+        "phase",
+        "event_type",
+        "command",
+        "actor_id",
+        "actor_side",
+        "actor_slot",
+        "actor_name",
+        "target_id",
+        "target_side",
+        "target_slot",
+        "target_name",
+        "move_name",
+        "pokemon_name",
+        "hp_current",
+        "hp_max",
+        "hp_status",
+        "delta_hp",
+        "effect",
+        "source",
+        "details_json",
+        "raw_args_json",
+        "raw_line"
+      ],
+      "file": "battle_events.csv"
+    }
+  }
+}

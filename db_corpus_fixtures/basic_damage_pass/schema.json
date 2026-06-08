@@ -1,0 +1,33 @@
+{
+  "system_stats": ["HP", "SPD"],
+  "system_gimmicks": [],
+  "health_stat": "HP",
+  "target_col": "result",
+  "battle_size": 2,
+  "speed_stat": "SPD",
+  "global_damage_formula": "999",
+  "sim_max_turns": 1,
+  "game_config": {"preserve_ids": true, "preserve_initial_on_field": true},
+  "log_schema": {
+    "battle_id_col": "battle_id",
+    "team_col": "team",
+    "entity_id_col": "entity_id",
+    "result_mode": "battle_level",
+    "ally_values": ["Ally"],
+    "enemy_values": ["Enemy"],
+    "initial_on_field_enabled": true,
+    "initial_on_field_col": "team",
+    "initial_on_field_values": ["Ally", "Enemy"],
+    "trace_moves_enabled": true,
+    "turn_col": "turn",
+    "actor_id_col": "actor",
+    "target_id_col": "target",
+    "move_name_col": "move",
+    "damage_trace_enabled": true,
+    "damage_turn_col": "turn",
+    "damage_actor_id_col": "actor",
+    "damage_target_id_col": "target",
+    "damage_value_col": "hp_delta",
+    "damage_value_kind": "hp_delta"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  ".codex_tmp/adapt8_multi_battle_replay/pokemon_showdown_multi.db": {
+    "source_kind": "pokemon_showdown_db_extract",
+    "battle_count": 2,
+    "event_count": 686,
+    "participant_count": 24,
+    "move_count": 72,
+    "state_event_count": 244,
+    "damage_event_count": 108,
+    "winner_side": "p1",
+    "winner_sides": {
+      "smogtours-gen5ou-59402": "p1",
+      "smogtours-gen5ou-59402_copy": "p1"
+    },
+    "warnings": [],
+    "roster_only_entities": [],
+    "unknown_damage_actor_count": 58
+  },
+  ".codex_tmp/adapt8_multi_battle_replay/input_zip.zip": {
+    "source_kind": "pokemon_showdown_db_extract",
+    "battle_count": 2,
+    "event_count": 686,
+    "participant_count": 24,
+    "move_count": 72,
+    "state_event_count": 244,
+    "damage_event_count": 108,
+    "winner_side": "p1",
+    "winner_sides": {
+      "smogtours-gen5ou-59402": "p1",
+      "smogtours-gen5ou-59402_copy": "p1"
+    },
+    "warnings": [],
+    "roster_only_entities": [],
+    "unknown_damage_actor_count": 58
+  }
+}

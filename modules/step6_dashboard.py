@@ -27,6 +27,61 @@ from modules.detection import module_active
 from modules.effect_key_roles import promote_effect_keys
 
 
+def resolve_db_corpus_log_schema(session_state_like):
+    return session_state_like.get("bb_last_log_schema") or session_state_like.get("db_corpus_schema", {}).get("log_schema")
+
+def has_db_corpus_schema(session_state_like, df=None):
+    return bool(resolve_db_corpus_log_schema(session_state_like))
+
+def default_backtest_method_index(session_state_like, df=None):
+    return 1 if has_db_corpus_schema(session_state_like, df) else 0
+
+def schema_col_default(log_schema, df_columns, schema_key, fallback_hints=None):
+    if log_schema and schema_key and schema_key in log_schema:
+        scol = log_schema[schema_key]
+        if scol in df_columns:
+            return scol
+    if fallback_hints:
+        for col in df_columns:
+            cl = str(col).lower()
+            if any(h in cl for h in fallback_hints):
+                return col
+    return "(없음)"
+
+def schema_sort_cols_default(log_schema, df_columns):
+    if log_schema and "sort_cols" in log_schema and log_schema["sort_cols"]:
+        scols = log_schema["sort_cols"]
+        valid_cols = [c for c in scols if c in df_columns]
+        if valid_cols:
+            return valid_cols
+    hints = ["turn", "round", "order", "seq", "index", "턴", "순서"]
+    for col in df_columns:
+        cl = str(col).lower()
+        if any(h in cl for h in hints):
+            return [col]
+    return []
+
+def merge_db_corpus_log_schema(base_log_schema, db_corpus_log_schema, ui_flags):
+    merged = dict(base_log_schema)
+    if db_corpus_log_schema:
+        for k, v in db_corpus_log_schema.items():
+            if k not in merged:
+                merged[k] = v
+                
+    if "initial_on_field_enabled" in ui_flags:
+        merged["initial_on_field_enabled"] = ui_flags["initial_on_field_enabled"]
+    if "state_trace_enabled" in ui_flags:
+        merged["state_trace_enabled"] = ui_flags["state_trace_enabled"]
+    if "trace_moves_enabled" in ui_flags:
+        merged["trace_moves_enabled"] = ui_flags["trace_moves_enabled"]
+        
+    if not merged.get("state_trace_enabled", False):
+        merged["observed_status_trace_enabled"] = False
+        merged["observed_hp_trace_enabled"] = False
+        merged["observed_switch_trace_enabled"] = False
+        
+    return merged
+
 def _select_backtest_stochasticity_factory(log_schema):
     if log_schema and log_schema.get("state_trace_enabled"):
         if bool(log_schema.get("state_score_deterministic", True)):
@@ -53,7 +108,6 @@ def _json_safe(val):
     return str(val)
 
 def _build_db_corpus_schema_payload(system_stats, system_gimmicks, health_stat, target_col, battle_size, log_schema, session_state_like):
-    import copy
     from modules.engine import DEFAULT_COMBAT_FLOW
     gc = copy.deepcopy(session_state_like.get("game_config") or {})
     if log_schema and log_schema.get("entity_id_col"):
@@ -221,6 +275,98 @@ def render_dashboard():
     df = st.session_state["df"]
     sys_stats = st.session_state.get('system_stats', [])
     sys_gimmicks = st.session_state.get('system_gimmicks', [])
+    
+    # ── DB 코퍼스 입력 감지 패널 ──
+    if st.session_state.get("db_corpus_adapter_report"):
+        report = st.session_state["db_corpus_adapter_report"]
+        schema = st.session_state.get("db_corpus_schema", {})
+        log_schema = schema.get("log_schema", {})
+        
+        has_run = st.session_state.get("db_corpus_last_backtest_has_run", False)
+        summary = st.session_state.get("db_corpus_last_backtest_summary", {})
+        mm_rows = st.session_state.get("db_corpus_last_mismatch_rows", [])
+        
+        b_count = report.get("battle_count", 0)
+        
+        if not has_run:
+            status_text = "백테스트 미실행"
+        else:
+            if summary.get("state_mismatches", 0) == 0 and summary.get("outcome_mismatches", 0) == 0:
+                status_text = "✅ 100% 일치 (Mismatch 없음)"
+            else:
+                status_text = f"⚠️ Mismatch 발견 (Turn {summary.get('first_mismatch_turn')})"
+        
+        st.info(f"✨ **DB 코퍼스 감지됨** | Battles: {b_count} | 상태: {status_text}")
+        
+        if has_run and summary.get("first_mismatch_turn") is not None:
+            st.warning(f"**First Mismatch**: Turn {summary.get('first_mismatch_turn')} | ID: `{summary.get('first_mismatch_id')}` | Kind: `{summary.get('first_mismatch_kind')}`\n- Expected: `{summary.get('first_mismatch_expected')}`\n- Actual: `{summary.get('first_mismatch_actual')}`")
+
+        tab_sum, tab_flags, tab_dl, tab_prev, tab_mm = st.tabs(["📊 Summary", "⚙️ Replay Flags", "📥 Downloads", "🔎 Preview", "❌ Mismatch"])
+        
+        with tab_sum:
+            st.markdown("##### 🚀 One-Click 백테스트")
+            if st.button("DB 코퍼스 전체 백테스트 실행", use_container_width=True, type="primary"):
+                from modules.ui_db_corpus_helper import run_db_corpus_backtest_from_session
+                with st.spinner("DB 코퍼스 백테스트 실행 중..."):
+                    try:
+                        new_summary, new_mm_rows = run_db_corpus_backtest_from_session(st.session_state)
+                        st.session_state["db_corpus_last_backtest_summary"] = new_summary
+                        st.session_state["db_corpus_last_mismatch_rows"] = new_mm_rows
+                        st.session_state["db_corpus_last_backtest_has_run"] = True
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"백테스트 실행 중 오류가 발생했습니다: {e}")
+            
+            if has_run:
+                st.markdown("##### 백테스트 지표")
+                m_c1, m_c2, m_c3, m_c4 = st.columns(4)
+                m_c1.metric("Battles (Actual/Pred)", f"{summary.get('actual_count', 0)} / {summary.get('predicted_count', 0)}")
+                m_c2.metric("Accuracy", f"{summary.get('accuracy_pct', 0.0):.1f}%")
+                m_c3.metric("Outcome Mismatches", summary.get("outcome_mismatches", 0))
+                m_c4.metric("State Mismatches", f"{summary.get('state_mismatches', 0)} / {summary.get('state_checks', 0)}")
+                
+        with tab_flags:
+            st.markdown("##### 활성화된 Replay Stack 플래그")
+            flags_col1, flags_col2, flags_col3, flags_col4, flags_col5 = st.columns(5)
+            flags_col1.checkbox("State Trace", value=log_schema.get("state_trace_enabled", False), disabled=True)
+            flags_col2.checkbox("Observed Status", value=log_schema.get("observed_status_trace_enabled", False), disabled=True)
+            flags_col3.checkbox("Observed HP", value=log_schema.get("observed_hp_trace_enabled", False), disabled=True)
+            flags_col4.checkbox("Observed Switch", value=log_schema.get("observed_switch_trace_enabled", False), disabled=True)
+            flags_col5.checkbox("Trace Moves", value=log_schema.get("trace_moves_enabled", False), disabled=True)
+            
+        with tab_dl:
+            st.markdown("##### 리포트 다운로드")
+            dl_c1, dl_c2 = st.columns(2)
+            
+            csv_data = df.to_csv(index=False).encode("utf-8")
+            dl_c1.download_button("📥 db_corpus_battle_log.csv", data=csv_data, file_name="db_corpus_battle_log.csv", mime="text/csv", use_container_width=True)
+            
+            schema_json = json.dumps(schema, indent=2, ensure_ascii=False)
+            dl_c2.download_button("📥 db_corpus_schema.json", data=schema_json, file_name="db_corpus_schema.json", mime="application/json", use_container_width=True)
+            
+            report_json = json.dumps(report, indent=2, ensure_ascii=False)
+            dl_c1.download_button("📥 db_corpus_adapter_report.json", data=report_json, file_name="db_corpus_adapter_report.json", mime="application/json", use_container_width=True)
+            
+            if has_run:
+                from modules.ui_db_corpus_helper import build_db_corpus_backtest_downloads
+                s_csv, m_csv = build_db_corpus_backtest_downloads(summary, mm_rows)
+                dl_c2.download_button("📥 db_corpus_backtest_summary.csv", data=s_csv.encode("utf-8"), file_name="db_corpus_backtest_summary.csv", mime="text/csv", use_container_width=True)
+                dl_c1.download_button("📥 db_corpus_mismatch_report.csv", data=m_csv.encode("utf-8"), file_name="db_corpus_mismatch_report.csv", mime="text/csv", use_container_width=True)
+                
+        with tab_prev:
+            st.markdown("##### 변환된 Battle Log 미리보기 (최초 100행)")
+            st.dataframe(df.head(100), use_container_width=True)
+            
+        with tab_mm:
+            if not has_run:
+                st.info("백테스트를 실행하면 여기에 Mismatch 내역이 표시됩니다.")
+            elif not mm_rows:
+                st.success("✅ Mismatch 없음 (100% 일치)")
+            else:
+                st.markdown("##### Mismatch Report 미리보기")
+                st.dataframe(pd.DataFrame(mm_rows).head(100), use_container_width=True)
+
+        st.markdown("---")
 
     # Phase 6 — Game Profile 기반 모듈 게이팅
     _gp6 = st.session_state.get('game_profile')
@@ -449,10 +595,41 @@ def render_dashboard():
             
         all_heroes = ["비어 있음"] + list(st.session_state.get('character_library', {}).keys())
         
-        if 'ally_df' not in st.session_state:
-            st.session_state['ally_df'] = get_default_df([st.session_state.get(f"Ally_slot_{i}_select", "비어 있음") for i in range(4)])
-        if 'enemy_df' not in st.session_state:
-            st.session_state['enemy_df'] = get_default_df([st.session_state.get(f"Enemy_slot_{i}_select", "비어 있음") for i in range(4)])
+        if 'ally_df' not in st.session_state or 'enemy_df' not in st.session_state:
+            available_heroes = [h for h in all_heroes if h != "비어 있음"]
+            default_ally_keys = (available_heroes * 4)[:4] if available_heroes else ["비어 있음"] * 4
+            default_enemy_keys = (available_heroes[4:] + available_heroes * 4)[:4] if available_heroes else ["비어 있음"] * 4
+            
+            ally_keys = [st.session_state.get(f"Ally_slot_{i}_select", default_ally_keys[i]) for i in range(4)]
+            enemy_keys = [st.session_state.get(f"Enemy_slot_{i}_select", default_enemy_keys[i]) for i in range(4)]
+            
+            if st.session_state.get("structured_package_mode") and "db_corpus_raw_tables" in st.session_state:
+                rosters_df = st.session_state["db_corpus_raw_tables"].get("battle_roster_pokemon")
+                if rosters_df is not None and not rosters_df.empty:
+                    b_id = rosters_df['battle_id'].iloc[0] if 'battle_id' in rosters_df.columns else None
+                    if b_id:
+                        sample_roster = rosters_df[rosters_df['battle_id'] == b_id]
+                    else:
+                        sample_roster = rosters_df
+                        
+                    players = sample_roster['player'].dropna().unique() if 'player' in sample_roster.columns else []
+                    if len(players) >= 2:
+                        ally_sample = sample_roster[sample_roster['player'] == players[0]]
+                        enemy_sample = sample_roster[sample_roster['player'] == players[1]]
+                    else:
+                        ally_sample = sample_roster.head(min(4, len(sample_roster)))
+                        enemy_sample = sample_roster.iloc[len(ally_sample):len(ally_sample)+4]
+                        
+                    def get_key(row):
+                        k = row.get("species", row.get("name", "비어 있음"))
+                        if pd.isna(k) or k == "nan": return "비어 있음"
+                        return str(k)
+                        
+                    ally_keys = [get_key(ally_sample.iloc[i]) if i < len(ally_sample) else "비어 있음" for i in range(4)]
+                    enemy_keys = [get_key(enemy_sample.iloc[i]) if i < len(enemy_sample) else "비어 있음" for i in range(4)]
+                    
+            st.session_state['ally_df'] = get_default_df(ally_keys)
+            st.session_state['enemy_df'] = get_default_df(enemy_keys)
             
         if col_input is not None:
             with col_input:
@@ -484,7 +661,7 @@ def render_dashboard():
                 
                 st.markdown("##### 🔵 Ally 파티")
                 st.metric("🔵 팀 총합 체급 (Ally)", f"{ally_team_total:.2f}", f"{team_delta:+.2f} 우세" if team_delta >= 0 else f"{team_delta:+.2f} 열세")
-                edited_ally = st.data_editor(st.session_state['ally_df'], column_config=column_config, use_container_width=True, hide_index=True)
+                edited_ally = st.data_editor(st.session_state['ally_df'], column_config=column_config, use_container_width=True, hide_index=True, key="ally_data_editor")
                 if not edited_ally.equals(st.session_state['ally_df']):
                     changed, new_ally = check_df_changes(st.session_state['ally_df'], edited_ally)
                     st.session_state['ally_df'] = new_ally
@@ -492,7 +669,7 @@ def render_dashboard():
     
                 st.markdown("##### 🔴 Enemy 파티")
                 st.metric("🔴 팀 총합 체급 (Enemy)", f"{enemy_team_total:.2f}", f"{-team_delta:+.2f} 우세" if -team_delta >= 0 else f"{-team_delta:+.2f} 열세")
-                edited_enemy = st.data_editor(st.session_state['enemy_df'], column_config=column_config, use_container_width=True, hide_index=True)
+                edited_enemy = st.data_editor(st.session_state['enemy_df'], column_config=column_config, use_container_width=True, hide_index=True, key="enemy_data_editor")
                 if not edited_enemy.equals(st.session_state['enemy_df']):
                     changed, new_enemy = check_df_changes(st.session_state['enemy_df'], edited_enemy)
                     st.session_state['enemy_df'] = new_enemy
@@ -571,20 +748,33 @@ def render_dashboard():
             if st.session_state.get('meta_stagnation_warn'):
                 st.error(f"🚨 **메타 고착화 위험 감지:** 지배적 조합 비중 {st.session_state.get('meta_stagnation_ratio', 0)*100:.1f}%")
 
-            current_win_rate = calculate_win_rate(ally_instances, enemy_instances) if st.session_state.get('has_ml_data') else None
+            target_mode = st.session_state.get("target_mode", "classification")
+            is_regression = target_mode in ("regression", "replay_validation", "none")
+            
             m1, m2 = st.columns(2)
-            with m1:
-                if current_win_rate is not None:
-                    delta_val = current_win_rate - st.session_state.get('initial_win_rate', current_win_rate)
-                    st.session_state['initial_win_rate'] = st.session_state.get('initial_win_rate', current_win_rate)
-                    st.metric("🏆 예측 승률 (Logistic Regression)", f"{current_win_rate:.1f}%", f"{delta_val:+.2f}% vs 초기")
-                else: st.metric("🏆 예측 승률", "N/A", "데이터 부족")
-            with m2: mc_metric_placeholder = st.empty()
-            mc_metric_placeholder.metric("🎲 Monte Carlo (1만회)", "대기 중", "버튼을 눌러 실행", delta_color="off")
+            
+            if is_regression:
+                with m1:
+                    st.metric("⚔️ 타깃 모드", "Regression / Validation", "승률 예측 우회됨")
+                with m2:
+                    mc_metric_placeholder = st.empty()
+                    mc_metric_placeholder.metric("🎲 Monte Carlo (1만회)", "대기 중", "버튼을 눌러 실행", delta_color="off")
+                st.info("💡 데미지 회귀 모델이 활성화되어 분류 기반 승률 예측은 건너뜁니다.")
+                current_win_rate = None
+            else:
+                current_win_rate = calculate_win_rate(ally_instances, enemy_instances) if st.session_state.get('has_ml_data') else None
+                with m1:
+                    if current_win_rate is not None:
+                        delta_val = current_win_rate - st.session_state.get('initial_win_rate', current_win_rate)
+                        st.session_state['initial_win_rate'] = st.session_state.get('initial_win_rate', current_win_rate)
+                        st.metric("🏆 예측 승률 (Logistic Regression)", f"{current_win_rate:.1f}%", f"{delta_val:+.2f}% vs 초기")
+                    else: st.metric("🏆 예측 승률", "N/A", "데이터 부족")
+                with m2: mc_metric_placeholder = st.empty()
+                mc_metric_placeholder.metric("🎲 Monte Carlo (1만회)", "대기 중", "버튼을 눌러 실행", delta_color="off")
 
-            if current_win_rate is not None:
-                st.markdown(f"<p style='color: #4B9BFF; margin-bottom: 2px; font-size: 14px;'><b>🔵 Ally Advantage ({current_win_rate:.1f}%)</b></p>" if current_win_rate >= 50 else f"<p style='color: #FF4B4B; margin-bottom: 2px; font-size: 14px;'><b>🔴 Enemy Advantage ({(100 - current_win_rate):.1f}%)</b></p>", unsafe_allow_html=True)
-                st.progress(current_win_rate / 100.0)
+                if current_win_rate is not None:
+                    st.markdown(f"<p style='color: #4B9BFF; margin-bottom: 2px; font-size: 14px;'><b>🔵 Ally Advantage ({current_win_rate:.1f}%)</b></p>" if current_win_rate >= 50 else f"<p style='color: #FF4B4B; margin-bottom: 2px; font-size: 14px;'><b>🔴 Enemy Advantage ({(100 - current_win_rate):.1f}%)</b></p>", unsafe_allow_html=True)
+                    st.progress(current_win_rate / 100.0)
                 
             # 2. 수직 스크롤 통제 (st.tabs 사용)
             chart_tabs = st.tabs(["Top 5 요소", "다변량 시각화", "시뮬레이션 로그"])
@@ -1012,16 +1202,20 @@ def render_dashboard():
                     else:
                         _bb_n_rows = len(_bb_df)
                         
+                        _db_corpus_log_schema = resolve_db_corpus_log_schema(st.session_state)
+                        _has_db_corpus_schema = has_db_corpus_schema(st.session_state, _bb_df)
+                        
                         _bb_method = st.radio(
                             "전투 구성 방식",
                             ["행 개수로 묶기 (기존)", "DB 역할 컬럼으로 묶기"],
+                            index=default_backtest_method_index(st.session_state, _bb_df),
                             horizontal=True,
                             help="로그 구조에 따라 선택하세요. 'DB 역할 컬럼'은 전투ID와 진영 컬럼을 기반으로 구성합니다."
                         )
                         
                         _bb_size = 2
                         _bb_max = 500
-                        _bb_log_schema = None
+                        _bb_log_schema = _db_corpus_log_schema if _has_db_corpus_schema else None
                         
                         if _bb_method == "행 개수로 묶기 (기존)":
                             _bb_c1, _bb_c2 = st.columns(2)
@@ -1044,18 +1238,11 @@ def render_dashboard():
                         else:
                             st.markdown("##### 🗂️ DB 역할 컬럼 매핑")
                             _all_cols = ["(없음)"] + list(_bb_df.columns)
-                            
-                            def _guess_col(hints):
-                                for col in _bb_df.columns:
-                                    cl = str(col).lower()
-                                    if any(h in cl for h in hints):
-                                        return col
-                                return "(없음)"
                                 
-                            _g_battle = _guess_col(["battle", "match", "combat", "game", "전투", "매치"])
-                            _g_team = _guess_col(["team", "side", "camp", "faction", "player", "진영", "팀"])
-                            _g_entity = _guess_col(["unit", "actor", "character", "hero", "pokemon", "entity", "slot", "유닛", "캐릭터"])
-                            _g_sort = _guess_col(["turn", "round", "order", "seq", "index", "턴", "순서"])
+                            _g_battle = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "battle_id_col", ["battle", "match", "combat", "game", "전투", "매치"])
+                            _g_team = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "team_col", ["team", "side", "camp", "faction", "player", "진영", "팀"])
+                            _g_entity = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "entity_id_col", ["unit", "actor", "character", "hero", "pokemon", "entity", "slot", "유닛", "캐릭터"])
+                            _g_sort = schema_sort_cols_default(_db_corpus_log_schema, _bb_df.columns)
                             
                             _bc1, _bc2 = st.columns(2)
                             with _bc1:
@@ -1063,11 +1250,12 @@ def render_dashboard():
                                 _bb_team_col = st.selectbox("팀/진영 컬럼", _all_cols, index=_all_cols.index(_g_team) if _g_team in _all_cols else 0)
                             with _bc2:
                                 _bb_ent_col = st.selectbox("참가자 ID 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_entity) if _g_entity in _all_cols else 0)
-                                _bb_sort_cols = st.multiselect("정렬 컬럼 (선택)", list(_bb_df.columns), default=[_g_sort] if _g_sort != "(없음)" else [])
+                                _bb_sort_cols = st.multiselect("정렬 컬럼 (선택)", list(_bb_df.columns), default=_g_sort)
                                 
                             _rc1, _rc2 = st.columns(2)
                             with _rc1:
-                                _bb_res_mode = st.selectbox("결과 해석 방식", ["battle_level", "side_signal"], index=0, help="battle_level: 그룹 첫 행의 승리 여부를 전투 결과로 봄 / side_signal: 팀 멤버별 결과의 합산 비교")
+                                _rm_def = _db_corpus_log_schema.get("result_mode", "battle_level") if _has_db_corpus_schema else "battle_level"
+                                _bb_res_mode = st.selectbox("결과 해석 방식", ["battle_level", "side_signal"], index=["battle_level", "side_signal"].index(_rm_def) if _rm_def in ["battle_level", "side_signal"] else 0, help="battle_level: 그룹 첫 행의 승리 여부를 전투 결과로 봄 / side_signal: 팀 멤버별 결과의 합산 비교")
                             with _rc2:
                                 _bb_max = st.number_input(
                                     "최대 전투 수",
@@ -1079,50 +1267,57 @@ def render_dashboard():
                             with st.expander("팀 값(문자열) 상세 매핑", expanded=False):
                                 _ac1, _ac2 = st.columns(2)
                                 with _ac1:
-                                    _bb_ally_vals = st.text_input("Ally로 인식할 추가 값 (쉼표 구분)", "Ally, ally, A, blue, player")
+                                    _av_def = ", ".join(map(str, _db_corpus_log_schema.get("ally_values", []))) if _has_db_corpus_schema and "ally_values" in _db_corpus_log_schema else "Ally, ally, A, blue, player"
+                                    _bb_ally_vals = st.text_input("Ally로 인식할 추가 값 (쉼표 구분)", _av_def)
                                 with _ac2:
-                                    _bb_enemy_vals = st.text_input("Enemy로 인식할 추가 값 (쉼표 구분)", "Enemy, enemy, E, red, opponent")
+                                    _ev_def = ", ".join(map(str, _db_corpus_log_schema.get("enemy_values", []))) if _has_db_corpus_schema and "enemy_values" in _db_corpus_log_schema else "Enemy, enemy, E, red, opponent"
+                                    _bb_enemy_vals = st.text_input("Enemy로 인식할 추가 값 (쉼표 구분)", _ev_def)
                                     
                             with st.expander("초기 필드 상태 (선택)", expanded=False):
-                                _if_use = st.checkbox("initial active/on-field 사용", value=False)
+                                _if_use_def = _db_corpus_log_schema.get("initial_on_field_enabled", False) if _has_db_corpus_schema else False
+                                _if_use = st.checkbox("initial active/on-field 사용", value=_if_use_def)
                                 
                                 _ic1, _ic2 = st.columns(2)
                                 with _ic1:
-                                    _g_i_on_field = _guess_col(["on_field", "active", "lead", "starter", "front", "slot_active", "initial_active", "is_active", "field", "선발", "초기", "활성", "필드", "전열"])
+                                    _g_i_on_field = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "initial_on_field_col", ["on_field", "active", "lead", "starter", "front", "slot_active", "initial_active", "is_active", "field", "선발", "초기", "활성", "필드", "전열"])
                                     _bb_initial_on_field_col = st.selectbox("initial on-field 컬럼", _all_cols, index=_all_cols.index(_g_i_on_field) if _g_i_on_field in _all_cols else 0)
                                 with _ic2:
-                                    _bb_initial_values = st.text_input("active로 인식할 값 목록 (쉼표 구분)", "1, true, yes, y, active, lead, on, field, front, starter, 초기, 선발, 활성, 필드, 전열")
+                                    _iv_def = ", ".join(map(str, _db_corpus_log_schema.get("initial_on_field_values", []))) if _has_db_corpus_schema and "initial_on_field_values" in _db_corpus_log_schema else "1, true, yes, y, active, lead, on, field, front, starter, 초기, 선발, 활성, 필드, 전열"
+                                    _bb_initial_values = st.text_input("active로 인식할 값 목록 (쉼표 구분)", _iv_def)
                                     
-                                _g_i_order = _guess_col(["roster_idx", "slot", "position", "party_order", "team_order", "order", "seq", "배치", "순서", "슬롯"])
+                                _g_i_order = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "initial_order_col", ["roster_idx", "slot", "position", "party_order", "team_order", "order", "seq", "배치", "순서", "슬롯"])
                                 _bb_initial_order_col = st.selectbox("initial roster/order 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_i_order) if _g_i_order in _all_cols else 0)
 
                             with st.expander("관측 상태 trace (선택)", expanded=False):
-                                _st_use = st.checkbox("state snapshot trace 사용", value=False)
+                                _st_use_def = _db_corpus_log_schema.get("state_trace_enabled", False) if _has_db_corpus_schema else False
+                                _st_use = st.checkbox("state snapshot trace 사용", value=_st_use_def)
                                 
                                 _sc1, _sc2 = st.columns(2)
                                 with _sc1:
-                                    _g_s_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _g_s_turn = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "state_turn_col", ["turn", "round", "턴", "라운드"])
                                     _bb_state_turn_col = st.selectbox("state turn 컬럼", _all_cols, index=_all_cols.index(_g_s_turn) if _g_s_turn in _all_cols else 0)
                                 with _sc2:
-                                    _g_s_id = _guess_col(["unit", "entity", "actor", "character", "hero", "pokemon", "참가자", "유닛"])
+                                    _g_s_id = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "state_entity_id_col", ["unit", "entity", "actor", "character", "hero", "pokemon", "참가자", "유닛"])
                                     _bb_state_id_col = st.selectbox("state entity ID 컬럼", _all_cols, index=_all_cols.index(_g_s_id) if _g_s_id in _all_cols else 0)
                                     
                                 _sc3, _sc4, _sc5 = st.columns(3)
                                 with _sc3:
-                                    _g_s_hp = _guess_col(["hp", "health", "current_hp", "remain_hp", "hp_after", "체력", "잔여"])
+                                    _g_s_hp = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "state_hp_col", ["hp", "health", "current_hp", "remain_hp", "hp_after", "체력", "잔여"])
                                     _bb_state_hp_col = st.selectbox("state HP 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_hp) if _g_s_hp in _all_cols else 0)
                                 with _sc4:
-                                    _g_s_status = _guess_col(["status", "condition", "state", "상태", "상태이상"])
+                                    _g_s_status = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "state_status_col", ["status", "condition", "state", "상태", "상태이상"])
                                     _bb_state_status_col = st.selectbox("state status 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_status) if _g_s_status in _all_cols else 0)
                                 with _sc5:
-                                    _g_s_fainted = _guess_col(["fainted", "dead", "ko", "down", "is_dead", "is_fainted", "기절", "쓰러짐"])
+                                    _g_s_fainted = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "state_fainted_col", ["fainted", "dead", "ko", "down", "is_dead", "is_fainted", "기절", "쓰러짐"])
                                     _bb_state_fainted_col = st.selectbox("state fainted 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_fainted) if _g_s_fainted in _all_cols else 0)
                                     
                                 _sc6, _sc7 = st.columns(2)
                                 with _sc6:
-                                    _bb_state_hp_mode = st.selectbox("state HP mode", ["absolute", "percent"], index=0)
+                                    _shm_def = _db_corpus_log_schema.get("state_hp_mode", "absolute") if _has_db_corpus_schema else "absolute"
+                                    _bb_state_hp_mode = st.selectbox("state HP mode", ["absolute", "percent"], index=["absolute", "percent"].index(_shm_def) if _shm_def in ["absolute", "percent"] else 0)
                                 with _sc7:
-                                    _bb_state_hp_tol = st.number_input("HP 허용 오차", min_value=0.0, value=0.0, step=1.0)
+                                    _sht_def = float(_db_corpus_log_schema.get("state_hp_tolerance", 0.0)) if _has_db_corpus_schema else 0.0
+                                    _bb_state_hp_tol = st.number_input("HP 허용 오차", min_value=0.0, value=_sht_def, step=1.0)
                                     
                                 _bb_state_resource_cols = {}
                                 _resource_config_for_state = st.session_state.get("resource_config") or {}
@@ -1137,7 +1332,7 @@ def render_dashboard():
                                     help="HP 외 MP/Shield/Cost 등 임의 자원의 관측 current 값을 비교합니다."
                                 )
                                 for _rname in _bb_state_resource_names:
-                                    _guess = _guess_col([str(_rname).lower(), str(_rname), f"{_rname}_after", f"{_rname}_current"])
+                                    _guess = schema_col_default(_db_corpus_log_schema, _bb_df.columns, f"state_resource_col_{_rname}", [str(_rname).lower(), str(_rname), f"{_rname}_after", f"{_rname}_current"])
                                     _col = st.selectbox(
                                         f"state {_rname} 컬럼",
                                         _all_cols,
@@ -1149,17 +1344,19 @@ def render_dashboard():
 
                                 _sc8, _sc9 = st.columns(2)
                                 with _sc8:
+                                    _srm_def = _db_corpus_log_schema.get("state_resource_mode", "absolute") if _has_db_corpus_schema else "absolute"
                                     _bb_state_resource_mode = st.selectbox(
                                         "state resource mode",
                                         ["absolute", "percent"],
-                                        index=0,
+                                        index=["absolute", "percent"].index(_srm_def) if _srm_def in ["absolute", "percent"] else 0,
                                         key="bb_state_resource_mode",
                                     )
                                 with _sc9:
+                                    _srt_def = float(_db_corpus_log_schema.get("state_resource_tolerance", 0.0)) if _has_db_corpus_schema else 0.0
                                     _bb_state_resource_tol = st.number_input(
                                         "resource 허용 오차",
                                         min_value=0.0,
-                                        value=0.0,
+                                        value=_srt_def,
                                         step=1.0,
                                         key="bb_state_resource_tol",
                                     )
@@ -1171,142 +1368,151 @@ def render_dashboard():
                                 )
 
                             with st.expander("행동 trace 연결 (선택)", expanded=False):
-                                _tc_use = st.checkbox("move trace 사용", value=False)
+                                _tc_use_def = _db_corpus_log_schema.get("trace_moves_enabled", False) if _has_db_corpus_schema else False
+                                _tc_use = st.checkbox("move trace 사용", value=_tc_use_def)
                                 
                                 _tc1, _tc2, _tc3 = st.columns(3)
                                 with _tc1:
-                                    _g_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _g_turn = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "turn_col", ["turn", "round", "턴", "라운드"])
                                     _bb_turn_col = st.selectbox("turn 컬럼", _all_cols, index=_all_cols.index(_g_turn) if _g_turn in _all_cols else 0)
                                 with _tc2:
-                                    _g_actor = _guess_col(["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
+                                    _g_actor = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "actor_id_col", ["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
                                     _bb_actor_col = st.selectbox("actor ID 컬럼", _all_cols, index=_all_cols.index(_g_actor) if _g_actor in _all_cols else 0)
                                 with _tc3:
-                                    _g_target = _guess_col(["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
+                                    _g_target = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "target_id_col", ["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
                                     _bb_target_col = st.selectbox("target ID 컬럼", _all_cols, index=_all_cols.index(_g_target) if _g_target in _all_cols else 0)
                                     
                                 _tc4, _tc5 = st.columns(2)
                                 with _tc4:
-                                    _g_move = _guess_col(["move", "skill", "action_name", "ability_name", "무브", "스킬", "행동명"])
+                                    _g_move = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_name_col", ["move", "skill", "action_name", "ability_name", "무브", "스킬", "행동명"])
                                     _bb_move_name_col = st.selectbox("move name 컬럼", _all_cols, index=_all_cols.index(_g_move) if _g_move in _all_cols else 0)
-                                    _g_action = _guess_col(["action", "event", "type", "kind", "행동", "이벤트", "종류"])
+                                    _g_action = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "action_col", ["action", "event", "type", "kind", "행동", "이벤트", "종류"])
                                     _bb_action_col = st.selectbox("action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_action) if _g_action in _all_cols else 0)
                                 with _tc5:
-                                    _bb_action_vals = st.text_input("move action 값 목록 (쉼표 구분)", "move, attack, skill, cast, use, use_move, act, 공격, 스킬, 무브, 행동")
+                                    _mav_def = ", ".join(map(str, _db_corpus_log_schema.get("move_action_values", []))) if _has_db_corpus_schema and "move_action_values" in _db_corpus_log_schema else "move, attack, skill, cast, use, use_move, act, 공격, 스킬, 무브, 행동"
+                                    _bb_action_vals = st.text_input("move action 값 목록 (쉼표 구분)", _mav_def)
                                 
                                 st.markdown("**무브 속성 오버라이드 컬럼 (선택)**")
                                 _tp1, _tp2, _tp3, _tp4 = st.columns(4)
-                                with _tp1: _bb_move_pwr = st.selectbox("power", _all_cols, index=0)
-                                with _tp2: _bb_move_typ = st.selectbox("type", _all_cols, index=0)
-                                with _tp3: _bb_move_cat = st.selectbox("category", _all_cols, index=0)
-                                with _tp4: _bb_move_pri = st.selectbox("priority", _all_cols, index=0)
+                                with _tp1: _bb_move_pwr = st.selectbox("power", _all_cols, index=_all_cols.index(schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_power_col")) if schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_power_col") in _all_cols else 0)
+                                with _tp2: _bb_move_typ = st.selectbox("type", _all_cols, index=_all_cols.index(schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_type_col")) if schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_type_col") in _all_cols else 0)
+                                with _tp3: _bb_move_cat = st.selectbox("category", _all_cols, index=_all_cols.index(schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_category_col")) if schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_category_col") in _all_cols else 0)
+                                with _tp4: _bb_move_pri = st.selectbox("priority", _all_cols, index=_all_cols.index(schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_priority_col")) if schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_priority_col") in _all_cols else 0)
                                     
                                 st.markdown("**행동 순서 (선택)**")
                                 _to1, _to2 = st.columns(2)
                                 with _to1:
-                                    _g_order = _guess_col(["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
+                                    _g_order = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "move_order_col", ["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
                                     _bb_move_order = st.selectbox("action order 컬럼", _all_cols, index=_all_cols.index(_g_order) if _g_order in _all_cols else 0)
                                 with _to2:
-                                    _bb_move_order_dir = st.selectbox("order 방향", ["ascending_first", "descending_first"])
+                                    _mod_def = _db_corpus_log_schema.get("move_order_direction", "ascending_first") if _has_db_corpus_schema else "ascending_first"
+                                    _bb_move_order_dir = st.selectbox("order 방향", ["ascending_first", "descending_first"], index=["ascending_first", "descending_first"].index(_mod_def) if _mod_def in ["ascending_first", "descending_first"] else 0)
                                     
                                 st.markdown("---")
                                 _ts_use = st.checkbox("switch trace 사용", value=False)
                                 
                                 _sc1, _sc2, _sc3 = st.columns(3)
                                 with _sc1:
-                                    _g_s_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _g_s_turn = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "switch_turn_col", ["turn", "round", "턴", "라운드"])
                                     _bb_switch_turn_col = st.selectbox("switch turn 컬럼", _all_cols, index=_all_cols.index(_g_s_turn) if _g_s_turn in _all_cols else 0)
                                 with _sc2:
-                                    _g_s_out = _guess_col(["outgoing", "switch_from", "actor", "unit", "entity", "old_unit", "switch_out_id", "교체자", "이탈"])
+                                    _g_s_out = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "switch_outgoing_id_col", ["outgoing", "switch_from", "actor", "unit", "entity", "old_unit", "switch_out_id", "교체자", "이탈"])
                                     _bb_switch_out_col = st.selectbox("switch outgoing ID 컬럼", _all_cols, index=_all_cols.index(_g_s_out) if _g_s_out in _all_cols else 0)
                                 with _sc3:
-                                    _g_s_in = _guess_col(["incoming", "switch_to", "next_unit", "new_unit", "replacement", "bench_in", "switch_in_id", "교체대상", "진입", "등장"])
+                                    _g_s_in = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "switch_incoming_id_col", ["incoming", "switch_to", "next_unit", "new_unit", "replacement", "bench_in", "switch_in_id", "교체대상", "진입", "등장"])
                                     _bb_switch_in_col = st.selectbox("switch incoming ID 컬럼", _all_cols, index=_all_cols.index(_g_s_in) if _g_s_in in _all_cols else 0)
                                     
                                 _sc4, _sc5 = st.columns(2)
                                 with _sc4:
-                                    _g_s_action = _guess_col(["action", "event", "type", "kind", "switch", "교체", "스위치", "태그"])
+                                    _g_s_action = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "switch_action_col", ["action", "event", "type", "kind", "switch", "교체", "스위치", "태그"])
                                     _bb_switch_action_col = st.selectbox("switch action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_s_action) if _g_s_action in _all_cols else 0)
                                 with _sc5:
-                                    _bb_switch_action_vals = st.text_input("switch action 값 목록 (쉼표 구분)", "switch, swap, tag, change, substitute, switch_out, switch_in, 교체, 스위치, 태그, 변경")
+                                    _sav_def = ", ".join(map(str, _db_corpus_log_schema.get("switch_action_values", []))) if _has_db_corpus_schema and "switch_action_values" in _db_corpus_log_schema else "switch, swap, tag, change, substitute, switch_out, switch_in, 교체, 스위치, 태그, 변경"
+                                    _bb_switch_action_vals = st.text_input("switch action 값 목록 (쉼표 구분)", _sav_def)
                                     
                                 st.markdown("---")
                                 _tf_use = st.checkbox("faint incoming trace 사용", value=False)
                                 
                                 _fc1, _fc2 = st.columns(2)
                                 with _fc1:
-                                    _g_f_turn = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _g_f_turn = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "faint_turn_col", ["turn", "round", "턴", "라운드"])
                                     _bb_faint_turn_col = st.selectbox("faint turn 컬럼", _all_cols, index=_all_cols.index(_g_f_turn) if _g_f_turn in _all_cols else 0)
                                 with _fc2:
-                                    _g_f_side = _guess_col(["side", "team", "camp", "faction", "player", "진영", "팀"])
+                                    _g_f_side = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "faint_side_col", ["side", "team", "camp", "faction", "player", "진영", "팀"])
                                     _bb_faint_side_col = st.selectbox("faint side 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_f_side) if _g_f_side in _all_cols else 0)
                                     
                                 _fc3, _fc4 = st.columns(2)
                                 with _fc3:
-                                    _g_f_out = _guess_col(["fainted", "faint", "ko", "dead", "defeated", "outgoing", "old_unit", "unit", "actor", "쓰러짐", "기절", "이탈"])
+                                    _g_f_out = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "faint_outgoing_id_col", ["fainted", "faint", "ko", "dead", "defeated", "outgoing", "old_unit", "unit", "actor", "쓰러짐", "기절", "이탈"])
                                     _bb_faint_out_col = st.selectbox("faint outgoing ID 컬럼", _all_cols, index=_all_cols.index(_g_f_out) if _g_f_out in _all_cols else 0)
                                 with _fc4:
-                                    _g_f_in = _guess_col(["incoming", "replacement", "replace", "send_out", "next_unit", "new_unit", "bench_in", "진입", "등장", "교체대상"])
+                                    _g_f_in = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "faint_incoming_id_col", ["incoming", "replacement", "replace", "send_out", "next_unit", "new_unit", "bench_in", "진입", "등장", "교체대상"])
                                     _bb_faint_in_col = st.selectbox("faint incoming ID 컬럼", _all_cols, index=_all_cols.index(_g_f_in) if _g_f_in in _all_cols else 0)
                                     
                                 _fc5, _fc6 = st.columns(2)
                                 with _fc5:
-                                    _g_f_action = _guess_col(["action", "event", "type", "kind", "faint", "ko", "replace", "send_out", "기절", "쓰러짐", "등장", "진입"])
+                                    _g_f_action = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "faint_action_col", ["action", "event", "type", "kind", "faint", "ko", "replace", "send_out", "기절", "쓰러짐", "등장", "진입"])
                                     _bb_faint_action_col = st.selectbox("faint action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_f_action) if _g_f_action in _all_cols else 0)
                                 with _fc6:
-                                    _bb_faint_action_vals = st.text_input("faint action 값 목록 (쉼표 구분)", "faint_replace, replace, replacement, send_out, enter_after_faint, fainted_switch, faint_incoming, ko_replace, forced_switch, 기절교체, 쓰러짐교체, 강제교체, 등장, 진입")
+                                    _fav_def = ", ".join(map(str, _db_corpus_log_schema.get("faint_action_values", []))) if _has_db_corpus_schema and "faint_action_values" in _db_corpus_log_schema else "faint_replace, replace, replacement, send_out, enter_after_faint, fainted_switch, faint_incoming, ko_replace, forced_switch, 기절교체, 쓰러짐교체, 강제교체, 등장, 진입"
+                                    _bb_faint_action_vals = st.text_input("faint action 값 목록 (쉼표 구분)", _fav_def)
                                     
                                 st.markdown("---")
                                 _td_use = st.checkbox("damage trace score 사용", value=False)
                                 
                                 _td1, _td2, _td3 = st.columns(3)
                                 with _td1:
-                                    _g_dt = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _g_dt = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "damage_turn_col", ["turn", "round", "턴", "라운드"])
                                     _bb_damage_turn_col = st.selectbox("damage turn 컬럼", _all_cols, index=_all_cols.index(_g_dt) if _g_dt in _all_cols else 0)
                                 with _td2:
-                                    _g_da = _guess_col(["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
+                                    _g_da = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "damage_actor_id_col", ["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
                                     _bb_damage_actor_col = st.selectbox("damage actor ID 컬럼", _all_cols, index=_all_cols.index(_g_da) if _g_da in _all_cols else 0)
                                 with _td3:
-                                    _g_dtg = _guess_col(["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
+                                    _g_dtg = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "damage_target_id_col", ["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
                                     _bb_damage_target_col = st.selectbox("damage target ID 컬럼", _all_cols, index=_all_cols.index(_g_dtg) if _g_dtg in _all_cols else 0)
                                     
                                 _td4, _td5 = st.columns(2)
                                 with _td4:
-                                    _g_dval = _guess_col(["damage", "dmg", "hp_delta", "damage_done", "damage_amount", "피해", "데미지", "딜", "체력감소"])
+                                    _g_dval = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "damage_value_col", ["damage", "dmg", "hp_delta", "damage_done", "damage_amount", "피해", "데미지", "딜", "체력감소"])
                                     _bb_damage_value_col = st.selectbox("damage value 컬럼", _all_cols, index=_all_cols.index(_g_dval) if _g_dval in _all_cols else 0)
+                                    _dvk_def = _db_corpus_log_schema.get("damage_value_kind", "damage") if _has_db_corpus_schema else "damage"
                                     _bb_damage_value_kind = st.selectbox(
                                         "damage 값 의미",
                                         ["damage", "hp_delta"],
-                                        index=0,
+                                        index=["damage", "hp_delta"].index(_dvk_def) if _dvk_def in ["damage", "hp_delta"] else 0,
                                         help="damage는 엔진 계산 데미지, hp_delta는 실제 HP 감소량과 비교합니다."
                                     )
-                                    _bb_damage_tol = st.number_input("damage 허용 오차", min_value=0.0, value=0.0, step=1.0)
+                                    _dtol_def = float(_db_corpus_log_schema.get("damage_tolerance", 0.0)) if _has_db_corpus_schema else 0.0
+                                    _bb_damage_tol = st.number_input("damage 허용 오차", min_value=0.0, value=_dtol_def, step=1.0)
                                 with _td5:
-                                    _g_dact = _guess_col(["action", "event", "type", "kind", "행동", "이벤트", "종류"])
+                                    _g_dact = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "damage_action_col", ["action", "event", "type", "kind", "행동", "이벤트", "종류"])
                                     _bb_damage_action_col = st.selectbox("damage action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_dact) if _g_dact in _all_cols else 0)
-                                    _bb_damage_action_vals = st.text_input("damage action 값 목록 (쉼표 구분)", "damage, hit, apply_damage, dmg, 피해, 데미지, 피격")
+                                    _dav_def = ", ".join(map(str, _db_corpus_log_schema.get("damage_action_values", []))) if _has_db_corpus_schema and "damage_action_values" in _db_corpus_log_schema else "damage, hit, apply_damage, dmg, 피해, 데미지, 피격"
+                                    _bb_damage_action_vals = st.text_input("damage action 값 목록 (쉼표 구분)", _dav_def)
                                     
                                 _td6, _td7, _td8 = st.columns(3)
                                 with _td6:
-                                    _g_dmv = _guess_col(["move", "skill", "action_name", "ability_name", "무브", "스킬", "행동명"])
+                                    _g_dmv = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "damage_move_name_col", ["move", "skill", "action_name", "ability_name", "무브", "스킬", "행동명"])
                                     _bb_damage_move_name_col = st.selectbox("damage move name 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_dmv) if _g_dmv in _all_cols else 0)
                                 with _td7:
-                                    _g_dord = _guess_col(["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
+                                    _g_dord = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "damage_order_col", ["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
                                     _bb_damage_order_col = st.selectbox("damage action order 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_dord) if _g_dord in _all_cols else 0)
                                 with _td8:
-                                    _bb_damage_order_dir = st.selectbox("damage order 방향", ["ascending_first", "descending_first"])
+                                    _dod_def = _db_corpus_log_schema.get("damage_order_direction", "ascending_first") if _has_db_corpus_schema else "ascending_first"
+                                    _bb_damage_order_dir = st.selectbox("damage order 방향", ["ascending_first", "descending_first"], index=["ascending_first", "descending_first"].index(_dod_def) if _dod_def in ["ascending_first", "descending_first"] else 0)
                                     
                                 st.markdown("---")
                                 _trd_use = st.checkbox("resource delta trace score 사용", value=False)
                                 
                                 _trd1, _trd2, _trd3 = st.columns(3)
                                 with _trd1:
-                                    _g_trd_t = _guess_col(["turn", "round", "턴", "라운드"])
+                                    _g_trd_t = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "resource_delta_turn_col", ["turn", "round", "턴", "라운드"])
                                     _bb_resource_delta_turn_col = st.selectbox("resource delta turn 컬럼", _all_cols, index=_all_cols.index(_g_trd_t) if _g_trd_t in _all_cols else 0)
                                 with _trd2:
-                                    _g_trd_a = _guess_col(["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
+                                    _g_trd_a = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "resource_delta_actor_id_col", ["actor", "attacker", "source", "caster", "user", "unit", "entity", "행동자", "공격자", "시전자"])
                                     _bb_resource_delta_actor_col = st.selectbox("resource delta actor ID 컬럼", _all_cols, index=_all_cols.index(_g_trd_a) if _g_trd_a in _all_cols else 0)
                                 with _trd3:
-                                    _g_trd_tg = _guess_col(["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
+                                    _g_trd_tg = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "resource_delta_target_id_col", ["target", "defender", "victim", "target_id", "대상", "타겟", "피격자"])
                                     _bb_resource_delta_target_col = st.selectbox("resource delta target ID 컬럼", _all_cols, index=_all_cols.index(_g_trd_tg) if _g_trd_tg in _all_cols else 0)
                                     
                                 _bb_resource_delta_cols = {}
@@ -1319,7 +1525,7 @@ def render_dashboard():
                                     help="APPLY_DAMAGE로 감소한 HP/Shield/Armor 등 target resource loss를 비교합니다."
                                 )
                                 for _rname in _bb_resource_delta_names:
-                                    _guess = _guess_col([
+                                    _guess = schema_col_default(_db_corpus_log_schema, _bb_df.columns, f"resource_delta_col_{_rname}", [
                                         f"{_rname}_loss", f"{_rname}_delta", f"{_rname}_damage",
                                         str(_rname).lower(), str(_rname),
                                     ])
@@ -1334,27 +1540,31 @@ def render_dashboard():
 
                                 _trd4, _trd5 = st.columns(2)
                                 with _trd4:
-                                    _g_trd_act = _guess_col(["action", "event", "type", "kind", "행동", "이벤트", "종류"])
+                                    _g_trd_act = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "resource_delta_action_col", ["action", "event", "type", "kind", "행동", "이벤트", "종류"])
                                     _bb_resource_delta_action_col = st.selectbox("resource delta action type 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_trd_act) if _g_trd_act in _all_cols else 0)
                                 with _trd5:
-                                    _bb_resource_delta_action_vals = st.text_input("resource delta action 값 목록 (쉼표 구분)", "damage, hit, apply_damage, dmg, 피해, 데미지, 피격")
+                                    _rdav_def = ", ".join(map(str, _db_corpus_log_schema.get("resource_delta_action_values", []))) if _has_db_corpus_schema and "resource_delta_action_values" in _db_corpus_log_schema else "damage, hit, apply_damage, dmg, 피해, 데미지, 피격"
+                                    _bb_resource_delta_action_vals = st.text_input("resource delta action 값 목록 (쉼표 구분)", _rdav_def)
 
                                 _trd6, _trd7, _trd8 = st.columns(3)
                                 with _trd6:
-                                    _g_trd_ord = _guess_col(["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
+                                    _g_trd_ord = schema_col_default(_db_corpus_log_schema, _bb_df.columns, "resource_delta_order_col", ["action_order", "order", "sequence", "seq", "action_seq", "turn_order", "timeline_order", "log_index", "행동순서", "순서"])
                                     _bb_resource_delta_order_col = st.selectbox("resource delta order 컬럼 (선택)", _all_cols, index=_all_cols.index(_g_trd_ord) if _g_trd_ord in _all_cols else 0)
                                 with _trd7:
-                                    _bb_resource_delta_order_dir = st.selectbox("resource delta order 방향", ["ascending_first", "descending_first"])
+                                    _rdod_def = _db_corpus_log_schema.get("resource_delta_order_direction", "ascending_first") if _has_db_corpus_schema else "ascending_first"
+                                    _bb_resource_delta_order_dir = st.selectbox("resource delta order 방향", ["ascending_first", "descending_first"], index=["ascending_first", "descending_first"].index(_rdod_def) if _rdod_def in ["ascending_first", "descending_first"] else 0)
                                 with _trd8:
-                                    _bb_resource_delta_tol = st.number_input("resource delta 허용 오차", min_value=0.0, value=0.0, step=1.0)
+                                    _rdtol_def = float(_db_corpus_log_schema.get("resource_delta_tolerance", 0.0)) if _has_db_corpus_schema else 0.0
+                                    _bb_resource_delta_tol = st.number_input("resource delta 허용 오차", min_value=0.0, value=_rdtol_def, step=1.0)
+                                    _rdse_def = _db_corpus_log_schema.get("resource_delta_strict_extra", False) if _has_db_corpus_schema else False
                                     _bb_resource_delta_strict_extra = st.checkbox(
                                         "관측하지 않은 resource delta도 extra로 벌점",
-                                        value=False,
+                                        value=_rdse_def,
                                         help="꺼두면 매핑한 resource 컬럼만 score 대상으로 삼습니다."
                                     )
                                     
                             if _bb_id_col != "(없음)" and _bb_team_col != "(없음)":
-                                _bb_log_schema = {
+                                _base_schema = {
                                     "battle_id_col": _bb_id_col,
                                     "team_col": _bb_team_col,
                                     "entity_id_col": None if _bb_ent_col == "(없음)" else _bb_ent_col,
@@ -1363,6 +1573,18 @@ def render_dashboard():
                                     "ally_values": [x.strip() for x in _bb_ally_vals.split(",") if x.strip()],
                                     "enemy_values": [x.strip() for x in _bb_enemy_vals.split(",") if x.strip()]
                                 }
+                                
+                                _ui_flags = {
+                                    "initial_on_field_enabled": _if_use,
+                                    "state_trace_enabled": _st_use,
+                                    "trace_moves_enabled": _tc_use
+                                }
+                                
+                                _bb_log_schema = merge_db_corpus_log_schema(
+                                    _base_schema, 
+                                    _db_corpus_log_schema if _has_db_corpus_schema else None,
+                                    _ui_flags
+                                )
                                 if _if_use:
                                     if _bb_initial_on_field_col == "(없음)":
                                         st.warning("⚠️ initial active/on-field를 사용하려면 initial on-field 컬럼을 선택해야 합니다.")
@@ -1514,7 +1736,6 @@ def render_dashboard():
                         if st.button("🔬 백테스트 실행", use_container_width=True, key="run_backtest", disabled=(_bb_method == "DB 역할 컬럼으로 묶기" and not _bb_log_schema)):
                             from modules.per_battle_backtest import build_battles, score_predictions
                             from modules.engine import _worker_simulate_match
-                            import copy
                             
                             _bb_gc = copy.deepcopy(st.session_state.get("game_config") or {})
                             if _bb_log_schema and _bb_log_schema.get("entity_id_col"):

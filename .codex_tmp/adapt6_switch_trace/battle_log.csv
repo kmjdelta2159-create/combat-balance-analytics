@@ -1,0 +1,225 @@
+battle_id,seq,turn_no,row_kind,team,entity_id,name,species,HP,result,initial_on_field,state_entity_id,hp_current,hp_max,hp_status,fainted,state_event_type,state_effect,state_source,state_details_json,state_raw_line,state_delta_hp,move_actor_id,move_target_id,move_name,move_order,damage_target_id,damage_value,damage_source,damage_source_kind,damage_actor_id,effect,source,raw_line,details_json
+smogtours-gen5ou-59402,-1,0.0,participant,ally,p1:Gengen,Gengen,"Breloom, F",307.0,1.0,True,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,enemy,p2:Rotom-Wash,Rotom-Wash,Rotom-Wash,271.0,1.0,True,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,ally,p1:Nanami,Nanami,Jirachi,403.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,enemy,p2:Hippowdon,Hippowdon,"Hippowdon, F",420.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,ally,p1:Rikimaru,Rikimaru,"Garchomp, M",420.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,ally,p1:Bonaparte,Bonaparte,"Politoed, M",323.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,ally,p1:Riou,Riou,Zapdos,383.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,enemy,p2:Latios,Latios,"Latios, M",304.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,ally,p1:Zamza,Zamza,"Tentacruel, M",363.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,enemy,p2:Ferrothorn,Ferrothorn,"Ferrothorn, F",352.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,enemy,p2:Metagross,Metagross,Metagross,344.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,-1,0.0,participant,enemy,p2:Stoutland,Stoutland,"Stoutland, F",312.0,1.0,False,,,,,,,,,,,,,,,,,,,,,,,,
+smogtours-gen5ou-59402,62,,state,,,,,,,,p1:Gengen,307.0,307.0,,False,PokemonSwitched,,nan,nan,"|switch|p1a: Gengen|Breloom, F|307/307",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,63,,state,,,,,,,,p2:Rotom-Wash,271.0,271.0,,False,PokemonSwitched,,nan,nan,|switch|p2a: Rotom-Wash|Rotom-Wash|271/271,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,66,1.0,move,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,p1:Gengen,Hidden Power,66.0,,,,,,,,,
+smogtours-gen5ou-59402,68,1.0,state,,,,,,,,p1:Gengen,69.0,307.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Gengen|69/307,-238.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,68,1.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Gengen,238.0,,direct_move,p2:Rotom-Wash,nan,,|-damage|p1a: Gengen|69/307,"{""tags"": []}"
+smogtours-gen5ou-59402,69,1.0,move,,,,,,,,,,,,,,,,,,,p1:Gengen,p2:Rotom-Wash,Spore,69.0,,,,,,,,,
+smogtours-gen5ou-59402,70,1.0,state,,,,,,,,p2:Rotom-Wash,,271.0,slp,False,StatusApplied,slp,nan,"{""tags"": []}",|-status|p2a: Rotom-Wash|slp,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,72,1.0,state,,,,,,,,p2:Rotom-Wash,,271.0,,False,StatusCured,slp,nan,"{""tags"": []}",|-curestatus|p2a: Rotom-Wash|slp,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,73,1.0,state,,,,,,,,p1:Gengen,,307.0,tox,False,StatusApplied,tox,nan,"{""tags"": [""[from] item: Toxic Orb""], ""from"": ""item: Toxic Orb""}",|-status|p1a: Gengen|tox|[from] item: Toxic Orb,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,84,2.0,state,,,,,,,,p1:Nanami,403.0,403.0,,False,PokemonSwitched,,nan,nan,|switch|p1a: Nanami|Jirachi|403/403,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,85,2.0,move,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,p1:Nanami,Hydro Pump,85.0,,,,,,,,,
+smogtours-gen5ou-59402,86,2.0,state,,,,,,,,p1:Nanami,253.0,403.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Nanami|253/403,-150.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,86,2.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Nanami,150.0,,direct_move,p2:Rotom-Wash,nan,,|-damage|p1a: Nanami|253/403,"{""tags"": []}"
+smogtours-gen5ou-59402,87,2.0,state,,,,,,,,p1:Nanami,278.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|278/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,90,3.0,move,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,p1:Nanami,Volt Switch,90.0,,,,,,,,,
+smogtours-gen5ou-59402,91,3.0,state,,,,,,,,p1:Nanami,193.0,403.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Nanami|193/403,-85.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,91,3.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Nanami,85.0,,direct_move,p2:Rotom-Wash,nan,,|-damage|p1a: Nanami|193/403,"{""tags"": []}"
+smogtours-gen5ou-59402,92,3.0,state,,,,,,,,p2:Hippowdon,420.0,420.0,,False,PokemonSwitched,,nan,nan,"|switch|p2a: Hippowdon|Hippowdon, F|420/420",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,94,3.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p1:Nanami,Wish,94.0,,,,,,,,,
+smogtours-gen5ou-59402,96,3.0,state,,,,,,,,p1:Nanami,218.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|218/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,102,4.0,state,,,,,,,,p1:Rikimaru,420.0,420.0,,False,PokemonSwitched,,nan,nan,"|switch|p1a: Rikimaru|Garchomp, M|420/420",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,103,4.0,move,,,,,,,,,,,,,,,,,,,p2:Hippowdon,p1:Rikimaru,Earthquake,103.0,,,,,,,,,
+smogtours-gen5ou-59402,104,4.0,state,,,,,,,,p1:Rikimaru,294.0,420.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Rikimaru|294/420,-126.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,104,4.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Rikimaru,126.0,,direct_move,p2:Hippowdon,nan,,|-damage|p1a: Rikimaru|294/420,"{""tags"": []}"
+smogtours-gen5ou-59402,106,4.0,state,,,,,,,,p1:Rikimaru,420.0,420.0,,False,HealApplied,,move: Wish,"{""tags"": [""[from] move: Wish"", ""[wisher] Nanami""], ""from"": ""move: Wish"", ""wisher"": ""Nanami""}",|-heal|p1a: Rikimaru|420/420|[from] move: Wish|[wisher] Nanami,126.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,108,5.0,move,,,,,,,,,,,,,,,,,,,p1:Rikimaru,p2:Hippowdon,Stealth Rock,108.0,,,,,,,,,
+smogtours-gen5ou-59402,110,5.0,move,,,,,,,,,,,,,,,,,,,p2:Hippowdon,p1:Rikimaru,Ice Fang,110.0,,,,,,,,,
+smogtours-gen5ou-59402,112,5.0,state,,,,,,,,p1:Rikimaru,236.0,420.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Rikimaru|236/420,-184.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,112,5.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Rikimaru,184.0,,direct_move,p2:Hippowdon,nan,,|-damage|p1a: Rikimaru|236/420,"{""tags"": []}"
+smogtours-gen5ou-59402,113,5.0,state,,,,,,,,p2:Hippowdon,368.0,420.0,,False,DamageApplied,,ability: Rough Skin,"{""tags"": [""[from] ability: Rough Skin"", ""[of] p1a: Rikimaru""], ""from"": ""ability: Rough Skin"", ""of"": ""p1a: Rikimaru""}",|-damage|p2a: Hippowdon|368/420|[from] ability: Rough Skin|[of] p1a: Rikimaru,-52.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,113,5.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,52.0,ability: Rough Skin,ability,p1:Rikimaru,nan,ability: Rough Skin,|-damage|p2a: Hippowdon|368/420|[from] ability: Rough Skin|[of] p1a: Rikimaru,"{""tags"": [""[from] ability: Rough Skin"", ""[of] p1a: Rikimaru""], ""from"": ""ability: Rough Skin"", ""of"": ""p1a: Rikimaru""}"
+smogtours-gen5ou-59402,114,5.0,state,,,,,,,,p2:Hippowdon,298.0,420.0,,False,DamageApplied,,item: Rocky Helmet,"{""tags"": [""[from] item: Rocky Helmet"", ""[of] p1a: Rikimaru""], ""from"": ""item: Rocky Helmet"", ""of"": ""p1a: Rikimaru""}",|-damage|p2a: Hippowdon|298/420|[from] item: Rocky Helmet|[of] p1a: Rikimaru,-70.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,114,5.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,70.0,item: Rocky Helmet,item,p1:Rikimaru,nan,item: Rocky Helmet,|-damage|p2a: Hippowdon|298/420|[from] item: Rocky Helmet|[of] p1a: Rikimaru,"{""tags"": [""[from] item: Rocky Helmet"", ""[of] p1a: Rikimaru""], ""from"": ""item: Rocky Helmet"", ""of"": ""p1a: Rikimaru""}"
+smogtours-gen5ou-59402,116,5.0,state,,,,,,,,p2:Hippowdon,324.0,420.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Hippowdon|324/420|[from] item: Leftovers,26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,118,6.0,move,,,,,,,,,,,,,,,,,,,p1:Rikimaru,p2:Hippowdon,Toxic,118.0,,,,,,,,,
+smogtours-gen5ou-59402,119,6.0,state,,,,,,,,p2:Hippowdon,,420.0,tox,False,StatusApplied,tox,nan,"{""tags"": []}",|-status|p2a: Hippowdon|tox,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,120,6.0,move,,,,,,,,,,,,,,,,,,,p2:Hippowdon,p1:Rikimaru,Stealth Rock,120.0,,,,,,,,,
+smogtours-gen5ou-59402,123,6.0,state,,,,,,,,p2:Hippowdon,350.0,420.0,tox,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Hippowdon|350/420 tox|[from] item: Leftovers,26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,124,6.0,state,,,,,,,,p2:Hippowdon,324.0,420.0,tox,False,DamageApplied,,psn,"{""tags"": [""[from] psn""], ""from"": ""psn""}",|-damage|p2a: Hippowdon|324/420 tox|[from] psn,-26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,124,6.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,26.0,psn,status,,nan,psn,|-damage|p2a: Hippowdon|324/420 tox|[from] psn,"{""tags"": [""[from] psn""], ""from"": ""psn""}"
+smogtours-gen5ou-59402,129,7.0,state,,,,,,,,p1:Bonaparte,323.0,323.0,,False,PokemonSwitched,,nan,nan,"|switch|p1a: Bonaparte|Politoed, M|323/323",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,130,7.0,state,,,,,,,,p1:Bonaparte,283.0,323.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p1a: Bonaparte|283/323|[from] Stealth Rock,-40.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,130,7.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Bonaparte,40.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p1a: Bonaparte|283/323|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,132,7.0,move,,,,,,,,,,,,,,,,,,,p2:Hippowdon,p1:Bonaparte,Earthquake,132.0,,,,,,,,,
+smogtours-gen5ou-59402,133,7.0,state,,,,,,,,p1:Bonaparte,108.0,323.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Bonaparte|108/323,-175.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,133,7.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Bonaparte,175.0,,direct_move,p2:Hippowdon,nan,,|-damage|p1a: Bonaparte|108/323,"{""tags"": []}"
+smogtours-gen5ou-59402,135,7.0,state,,,,,,,,p2:Hippowdon,350.0,420.0,tox,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Hippowdon|350/420 tox|[from] item: Leftovers,26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,136,7.0,state,,,,,,,,p2:Hippowdon,298.0,420.0,tox,False,DamageApplied,,psn,"{""tags"": [""[from] psn""], ""from"": ""psn""}",|-damage|p2a: Hippowdon|298/420 tox|[from] psn,-52.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,136,7.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,52.0,psn,status,,nan,psn,|-damage|p2a: Hippowdon|298/420 tox|[from] psn,"{""tags"": [""[from] psn""], ""from"": ""psn""}"
+smogtours-gen5ou-59402,138,8.0,state,,,,,,,,p2:Rotom-Wash,271.0,271.0,,False,PokemonSwitched,,nan,nan,|switch|p2a: Rotom-Wash|Rotom-Wash|271/271,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,139,8.0,state,,,,,,,,p2:Rotom-Wash,238.0,271.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Rotom-Wash|238/271|[from] Stealth Rock,-33.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,139,8.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,33.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Rotom-Wash|238/271|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,140,8.0,move,,,,,,,,,,,,,,,,,,,p1:Bonaparte,p2:Rotom-Wash,Scald,140.0,,,,,,,,,
+smogtours-gen5ou-59402,142,8.0,state,,,,,,,,p2:Rotom-Wash,159.0,271.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Rotom-Wash|159/271,-79.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,142,8.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,79.0,,direct_move,p1:Bonaparte,nan,,|-damage|p2a: Rotom-Wash|159/271,"{""tags"": []}"
+smogtours-gen5ou-59402,143,8.0,state,,,,,,,,p2:Rotom-Wash,,271.0,brn,False,StatusApplied,brn,nan,"{""tags"": []}",|-status|p2a: Rotom-Wash|brn,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,145,8.0,state,,,,,,,,p2:Rotom-Wash,126.0,271.0,brn,False,DamageApplied,,brn,"{""tags"": [""[from] brn""], ""from"": ""brn""}",|-damage|p2a: Rotom-Wash|126/271 brn|[from] brn,-33.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,145,8.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,33.0,brn,status,,nan,brn,|-damage|p2a: Rotom-Wash|126/271 brn|[from] brn,"{""tags"": [""[from] brn""], ""from"": ""brn""}"
+smogtours-gen5ou-59402,147,9.0,state,,,,,,,,p1:Riou,383.0,383.0,,False,PokemonSwitched,,nan,nan,|switch|p1a: Riou|Zapdos|383/383,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,148,9.0,state,,,,,,,,p1:Riou,288.0,383.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p1a: Riou|288/383|[from] Stealth Rock,-95.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,148,9.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Riou,95.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p1a: Riou|288/383|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,150,9.0,move,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,p1:Riou,Hydro Pump,150.0,,,,,,,,,
+smogtours-gen5ou-59402,151,9.0,state,,,,,,,,p1:Riou,35.0,383.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Riou|35/383,-253.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,151,9.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Riou,253.0,,direct_move,p2:Rotom-Wash,nan,,|-damage|p1a: Riou|35/383,"{""tags"": []}"
+smogtours-gen5ou-59402,153,9.0,state,,,,,,,,p1:Riou,58.0,383.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Riou|58/383|[from] item: Leftovers,23.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,154,9.0,state,,,,,,,,p2:Rotom-Wash,93.0,271.0,brn,False,DamageApplied,,brn,"{""tags"": [""[from] brn""], ""from"": ""brn""}",|-damage|p2a: Rotom-Wash|93/271 brn|[from] brn,-33.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,154,9.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,33.0,brn,status,,nan,brn,|-damage|p2a: Rotom-Wash|93/271 brn|[from] brn,"{""tags"": [""[from] brn""], ""from"": ""brn""}"
+smogtours-gen5ou-59402,156,10.0,move,,,,,,,,,,,,,,,,,,,p1:Riou,p2:Rotom-Wash,Thunderbolt,156.0,,,,,,,,,
+smogtours-gen5ou-59402,157,10.0,state,,,,,,,,p2:Rotom-Wash,0.0,271.0,fnt,True,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Rotom-Wash|0 fnt,-93.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,157,10.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Rotom-Wash,93.0,,direct_move,p1:Riou,nan,,|-damage|p2a: Rotom-Wash|0 fnt,"{""tags"": []}"
+smogtours-gen5ou-59402,158,10.0,state,,,,,,,,p2:Rotom-Wash,0.0,271.0,,True,PokemonFainted,,nan,nan,|faint|p2a: Rotom-Wash,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,160,10.0,state,,,,,,,,p1:Riou,81.0,383.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Riou|81/383|[from] item: Leftovers,23.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,161,10.0,state,,,,,,,,p2:Latios,304.0,304.0,,False,PokemonSwitched,,nan,nan,"|switch|p2a: Latios|Latios, M|304/304",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,162,10.0,state,,,,,,,,p2:Latios,266.0,304.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Latios|266/304|[from] Stealth Rock,-38.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,162,10.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,38.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Latios|266/304|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,164,11.0,state,,,,,,,,p1:Zamza,363.0,363.0,,False,PokemonSwitched,,nan,nan,"|switch|p1a: Zamza|Tentacruel, M|363/363",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,165,11.0,state,,,,,,,,p1:Zamza,318.0,363.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p1a: Zamza|318/363|[from] Stealth Rock,-45.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,165,11.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Zamza,45.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p1a: Zamza|318/363|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,166,11.0,move,,,,,,,,,,,,,,,,,,,p2:Latios,p1:Zamza,Draco Meteor,166.0,,,,,,,,,
+smogtours-gen5ou-59402,169,11.0,state,,,,,,,,p1:Zamza,340.0,363.0,,False,HealApplied,,ability: Rain Dish,"{""tags"": [""[from] ability: Rain Dish""], ""from"": ""ability: Rain Dish""}",|-heal|p1a: Zamza|340/363|[from] ability: Rain Dish,22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,170,11.0,state,,,,,,,,p1:Zamza,362.0,363.0,,False,HealApplied,,item: Black Sludge,"{""tags"": [""[from] item: Black Sludge""], ""from"": ""item: Black Sludge""}",|-heal|p1a: Zamza|362/363|[from] item: Black Sludge,22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,174,12.0,move,,,,,,,,,,,,,,,,,,,p2:Latios,p1:Zamza,Draco Meteor,174.0,,,,,,,,,
+smogtours-gen5ou-59402,175,12.0,state,,,,,,,,p1:Zamza,35.0,363.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Zamza|35/363,-327.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,175,12.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Zamza,327.0,,direct_move,p2:Latios,nan,,|-damage|p1a: Zamza|35/363,"{""tags"": []}"
+smogtours-gen5ou-59402,177,12.0,move,,,,,,,,,,,,,,,,,,,p1:Zamza,p2:Latios,Rapid Spin,177.0,,,,,,,,,
+smogtours-gen5ou-59402,178,12.0,state,,,,,,,,p2:Latios,253.0,304.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Latios|253/304,-13.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,178,12.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,13.0,,direct_move,p1:Zamza,nan,,|-damage|p2a: Latios|253/304,"{""tags"": []}"
+smogtours-gen5ou-59402,181,12.0,state,,,,,,,,p1:Zamza,57.0,363.0,,False,HealApplied,,ability: Rain Dish,"{""tags"": [""[from] ability: Rain Dish""], ""from"": ""ability: Rain Dish""}",|-heal|p1a: Zamza|57/363|[from] ability: Rain Dish,22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,182,12.0,state,,,,,,,,p1:Zamza,79.0,363.0,,False,HealApplied,,item: Black Sludge,"{""tags"": [""[from] item: Black Sludge""], ""from"": ""item: Black Sludge""}",|-heal|p1a: Zamza|79/363|[from] item: Black Sludge,22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,184,13.0,state,,,,,,,,p2:Hippowdon,298.0,420.0,tox,False,PokemonSwitched,,nan,nan,"|switch|p2a: Hippowdon|Hippowdon, F|298/420 tox",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,185,13.0,state,,,,,,,,p2:Hippowdon,272.0,420.0,tox,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Hippowdon|272/420 tox|[from] Stealth Rock,-26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,185,13.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,26.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Hippowdon|272/420 tox|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,187,13.0,move,,,,,,,,,,,,,,,,,,,p1:Zamza,p2:Hippowdon,Scald,187.0,,,,,,,,,
+smogtours-gen5ou-59402,189,13.0,state,,,,,,,,p2:Hippowdon,60.0,420.0,tox,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Hippowdon|60/420 tox,-212.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,189,13.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,212.0,,direct_move,p1:Zamza,nan,,|-damage|p2a: Hippowdon|60/420 tox,"{""tags"": []}"
+smogtours-gen5ou-59402,191,13.0,state,,,,,,,,p1:Zamza,57.0,363.0,,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p1a: Zamza|57/363|[from] sandstorm,-22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,191,13.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Zamza,22.0,sandstorm,weather,,nan,sandstorm,|-damage|p1a: Zamza|57/363|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,192,13.0,state,,,,,,,,p1:Zamza,79.0,363.0,,False,HealApplied,,item: Black Sludge,"{""tags"": [""[from] item: Black Sludge""], ""from"": ""item: Black Sludge""}",|-heal|p1a: Zamza|79/363|[from] item: Black Sludge,22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,193,13.0,state,,,,,,,,p2:Hippowdon,86.0,420.0,tox,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Hippowdon|86/420 tox|[from] item: Leftovers,26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,194,13.0,state,,,,,,,,p2:Hippowdon,60.0,420.0,tox,False,DamageApplied,,psn,"{""tags"": [""[from] psn""], ""from"": ""psn""}",|-damage|p2a: Hippowdon|60/420 tox|[from] psn,-26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,194,13.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,26.0,psn,status,,nan,psn,|-damage|p2a: Hippowdon|60/420 tox|[from] psn,"{""tags"": [""[from] psn""], ""from"": ""psn""}"
+smogtours-gen5ou-59402,196,14.0,state,,,,,,,,p2:Ferrothorn,352.0,352.0,,False,PokemonSwitched,,nan,nan,"|switch|p2a: Ferrothorn|Ferrothorn, F|352/352",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,197,14.0,state,,,,,,,,p2:Ferrothorn,330.0,352.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Ferrothorn|330/352|[from] Stealth Rock,-22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,197,14.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Ferrothorn,22.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Ferrothorn|330/352|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,198,14.0,move,,,,,,,,,,,,,,,,,,,p1:Zamza,p2:Ferrothorn,Scald,198.0,,,,,,,,,
+smogtours-gen5ou-59402,200,14.0,state,,,,,,,,p2:Ferrothorn,304.0,352.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Ferrothorn|304/352,-26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,200,14.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Ferrothorn,26.0,,direct_move,p1:Zamza,nan,,|-damage|p2a: Ferrothorn|304/352,"{""tags"": []}"
+smogtours-gen5ou-59402,201,14.0,state,,,,,,,,p2:Ferrothorn,,352.0,brn,False,StatusApplied,brn,nan,"{""tags"": []}",|-status|p2a: Ferrothorn|brn,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,203,14.0,state,,,,,,,,p1:Zamza,57.0,363.0,,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p1a: Zamza|57/363|[from] sandstorm,-22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,203,14.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Zamza,22.0,sandstorm,weather,,nan,sandstorm,|-damage|p1a: Zamza|57/363|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,204,14.0,state,,,,,,,,p1:Zamza,79.0,363.0,,False,HealApplied,,item: Black Sludge,"{""tags"": [""[from] item: Black Sludge""], ""from"": ""item: Black Sludge""}",|-heal|p1a: Zamza|79/363|[from] item: Black Sludge,22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,205,14.0,state,,,,,,,,p2:Ferrothorn,326.0,352.0,brn,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Ferrothorn|326/352 brn|[from] item: Leftovers,22.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,206,14.0,state,,,,,,,,p2:Ferrothorn,282.0,352.0,brn,False,DamageApplied,,brn,"{""tags"": [""[from] brn""], ""from"": ""brn""}",|-damage|p2a: Ferrothorn|282/352 brn|[from] brn,-44.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,206,14.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Ferrothorn,44.0,brn,status,,nan,brn,|-damage|p2a: Ferrothorn|282/352 brn|[from] brn,"{""tags"": [""[from] brn""], ""from"": ""brn""}"
+smogtours-gen5ou-59402,208,15.0,state,,,,,,,,p1:Bonaparte,108.0,323.0,,False,PokemonSwitched,,nan,nan,"|switch|p1a: Bonaparte|Politoed, M|108/323",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,210,15.0,move,,,,,,,,,,,,,,,,,,,p2:Ferrothorn,p1:Bonaparte,Explosion,210.0,,,,,,,,,
+smogtours-gen5ou-59402,211,15.0,state,,,,,,,,p1:Bonaparte,0.0,323.0,fnt,True,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Bonaparte|0 fnt,-108.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,211,15.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Bonaparte,108.0,,direct_move,p2:Ferrothorn,nan,,|-damage|p1a: Bonaparte|0 fnt,"{""tags"": []}"
+smogtours-gen5ou-59402,212,15.0,state,,,,,,,,p2:Ferrothorn,0.0,352.0,,True,PokemonFainted,,nan,nan,|faint|p2a: Ferrothorn,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,213,15.0,state,,,,,,,,p1:Bonaparte,0.0,323.0,,True,PokemonFainted,,nan,nan,|faint|p1a: Bonaparte,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,215,15.0,state,,,,,,,,p1:Rikimaru,236.0,420.0,,False,PokemonSwitched,,nan,nan,"|switch|p1a: Rikimaru|Garchomp, M|236/420",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,216,15.0,state,,,,,,,,p2:Hippowdon,60.0,420.0,tox,False,PokemonSwitched,,nan,nan,"|switch|p2a: Hippowdon|Hippowdon, F|60/420 tox",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,217,15.0,state,,,,,,,,p2:Hippowdon,34.0,420.0,tox,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Hippowdon|34/420 tox|[from] Stealth Rock,-26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,217,15.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,26.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Hippowdon|34/420 tox|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,220,16.0,state,,,,,,,,p2:Latios,253.0,304.0,,False,PokemonSwitched,,nan,nan,"|switch|p2a: Latios|Latios, M|253/304",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,221,16.0,state,,,,,,,,p2:Latios,215.0,304.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Latios|215/304|[from] Stealth Rock,-38.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,221,16.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,38.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Latios|215/304|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,222,16.0,move,,,,,,,,,,,,,,,,,,,p1:Rikimaru,p2:Latios,Earthquake,222.0,,,,,,,,,
+smogtours-gen5ou-59402,225,16.0,state,,,,,,,,p2:Latios,196.0,304.0,,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p2a: Latios|196/304|[from] sandstorm,-19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,225,16.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,19.0,sandstorm,weather,,nan,sandstorm,|-damage|p2a: Latios|196/304|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,227,17.0,state,,,,,,,,p1:Gengen,69.0,307.0,tox,False,PokemonSwitched,,nan,nan,"|switch|p1a: Gengen|Breloom, F|69/307 tox",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,228,17.0,move,,,,,,,,,,,,,,,,,,,p2:Latios,p1:Gengen,Draco Meteor,228.0,,,,,,,,,
+smogtours-gen5ou-59402,229,17.0,state,,,,,,,,p1:Gengen,0.0,307.0,fnt,True,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Gengen|0 fnt,-69.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,229,17.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Gengen,69.0,,direct_move,p2:Latios,nan,,|-damage|p1a: Gengen|0 fnt,"{""tags"": []}"
+smogtours-gen5ou-59402,231,17.0,state,,,,,,,,p1:Gengen,0.0,307.0,,True,PokemonFainted,,nan,nan,|faint|p1a: Gengen,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,233,17.0,state,,,,,,,,p2:Latios,177.0,304.0,,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p2a: Latios|177/304|[from] sandstorm,-19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,233,17.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,19.0,sandstorm,weather,,nan,sandstorm,|-damage|p2a: Latios|177/304|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,234,17.0,state,,,,,,,,p1:Nanami,218.0,403.0,,False,PokemonSwitched,,nan,nan,|switch|p1a: Nanami|Jirachi|218/403,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,236,18.0,state,,,,,,,,p2:Metagross,344.0,344.0,,False,PokemonSwitched,,nan,nan,|switch|p2a: Metagross|Metagross|344/344,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,237,18.0,state,,,,,,,,p2:Metagross,323.0,344.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Metagross|323/344|[from] Stealth Rock,-21.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,237,18.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Metagross,21.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Metagross|323/344|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,238,18.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p1:Nanami,Wish,238.0,,,,,,,,,
+smogtours-gen5ou-59402,240,18.0,state,,,,,,,,p1:Nanami,243.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|243/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,242,19.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p1:Nanami,Protect,242.0,,,,,,,,,
+smogtours-gen5ou-59402,244,19.0,move,,,,,,,,,,,,,,,,,,,p2:Metagross,p1:Nanami,Explosion,244.0,,,,,,,,,
+smogtours-gen5ou-59402,246,19.0,state,,,,,,,,p2:Metagross,0.0,344.0,,True,PokemonFainted,,nan,nan,|faint|p2a: Metagross,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,248,19.0,state,,,,,,,,p1:Nanami,403.0,403.0,,False,HealApplied,,move: Wish,"{""tags"": [""[from] move: Wish"", ""[wisher] Nanami""], ""from"": ""move: Wish"", ""wisher"": ""Nanami""}",|-heal|p1a: Nanami|403/403|[from] move: Wish|[wisher] Nanami,160.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,251,19.0,state,,,,,,,,p2:Latios,177.0,304.0,,False,PokemonSwitched,,nan,nan,"|switch|p2a: Latios|Latios, M|177/304",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,252,19.0,state,,,,,,,,p2:Latios,139.0,304.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Latios|139/304|[from] Stealth Rock,-38.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,252,19.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,38.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Latios|139/304|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,257,20.0,state,,,,,,,,p1:Riou,81.0,383.0,,False,PokemonSwitched,,nan,nan,|switch|p1a: Riou|Zapdos|81/383,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,259,20.0,move,,,,,,,,,,,,,,,,,,,p2:Latios,p1:Riou,Trick,259.0,,,,,,,,,
+smogtours-gen5ou-59402,264,20.0,state,,,,,,,,p2:Latios,120.0,304.0,,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p2a: Latios|120/304|[from] sandstorm,-19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,264,20.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,19.0,sandstorm,weather,,nan,sandstorm,|-damage|p2a: Latios|120/304|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,265,20.0,state,,,,,,,,p1:Riou,58.0,383.0,,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p1a: Riou|58/383|[from] sandstorm,-23.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,265,20.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Riou,23.0,sandstorm,weather,,nan,sandstorm,|-damage|p1a: Riou|58/383|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,266,20.0,state,,,,,,,,p2:Latios,139.0,304.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Latios|139/304|[from] item: Leftovers,19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,268,21.0,state,,,,,,,,p1:Nanami,403.0,403.0,,False,PokemonSwitched,,nan,nan,|switch|p1a: Nanami|Jirachi|403/403,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,269,21.0,move,,,,,,,,,,,,,,,,,,,p2:Latios,p1:Nanami,Psyshock,269.0,,,,,,,,,
+smogtours-gen5ou-59402,271,21.0,state,,,,,,,,p1:Nanami,368.0,403.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Nanami|368/403,-35.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,271,21.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Nanami,35.0,,direct_move,p2:Latios,nan,,|-damage|p1a: Nanami|368/403,"{""tags"": []}"
+smogtours-gen5ou-59402,273,21.0,state,,,,,,,,p2:Latios,120.0,304.0,,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p2a: Latios|120/304|[from] sandstorm,-19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,273,21.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,19.0,sandstorm,weather,,nan,sandstorm,|-damage|p2a: Latios|120/304|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,274,21.0,state,,,,,,,,p2:Latios,139.0,304.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Latios|139/304|[from] item: Leftovers,19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,275,21.0,state,,,,,,,,p1:Nanami,393.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|393/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,277,22.0,move,,,,,,,,,,,,,,,,,,,p2:Latios,p1:Nanami,Hidden Power,277.0,,,,,,,,,
+smogtours-gen5ou-59402,279,22.0,state,,,,,,,,p1:Nanami,275.0,403.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Nanami|275/403,-118.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,279,22.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Nanami,118.0,,direct_move,p2:Latios,nan,,|-damage|p1a: Nanami|275/403,"{""tags"": []}"
+smogtours-gen5ou-59402,280,22.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p2:Latios,Body Slam,280.0,,,,,,,,,
+smogtours-gen5ou-59402,281,22.0,state,,,,,,,,p2:Latios,64.0,304.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Latios|64/304,-75.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,281,22.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,75.0,,direct_move,p1:Nanami,nan,,|-damage|p2a: Latios|64/304,"{""tags"": []}"
+smogtours-gen5ou-59402,282,22.0,state,,,,,,,,p2:Latios,,304.0,par,False,StatusApplied,par,nan,"{""tags"": []}",|-status|p2a: Latios|par,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,284,22.0,state,,,,,,,,p2:Latios,45.0,304.0,par,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p2a: Latios|45/304 par|[from] sandstorm,-19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,284,22.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,19.0,sandstorm,weather,,nan,sandstorm,|-damage|p2a: Latios|45/304 par|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,285,22.0,state,,,,,,,,p1:Nanami,300.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|300/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,286,22.0,state,,,,,,,,p2:Latios,64.0,304.0,par,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Latios|64/304 par|[from] item: Leftovers,19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,288,23.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p1:Nanami,Protect,288.0,,,,,,,,,
+smogtours-gen5ou-59402,290,23.0,move,,,,,,,,,,,,,,,,,,,p2:Latios,p1:Nanami,Hidden Power,290.0,,,,,,,,,
+smogtours-gen5ou-59402,293,23.0,state,,,,,,,,p2:Latios,45.0,304.0,par,False,DamageApplied,,sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}",|-damage|p2a: Latios|45/304 par|[from] sandstorm,-19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,293,23.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,19.0,sandstorm,weather,,nan,sandstorm,|-damage|p2a: Latios|45/304 par|[from] sandstorm,"{""tags"": [""[from] sandstorm""], ""from"": ""sandstorm""}"
+smogtours-gen5ou-59402,294,23.0,state,,,,,,,,p1:Nanami,325.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|325/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,295,23.0,state,,,,,,,,p2:Latios,64.0,304.0,par,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p2a: Latios|64/304 par|[from] item: Leftovers,19.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,299,24.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p2:Latios,Iron Head,299.0,,,,,,,,,
+smogtours-gen5ou-59402,300,24.0,state,,,,,,,,p2:Latios,0.0,304.0,fnt,True,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Latios|0 fnt,-64.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,300,24.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Latios,64.0,,direct_move,p1:Nanami,nan,,|-damage|p2a: Latios|0 fnt,"{""tags"": []}"
+smogtours-gen5ou-59402,301,24.0,state,,,,,,,,p2:Latios,0.0,304.0,,True,PokemonFainted,,nan,nan,|faint|p2a: Latios,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,303,24.0,state,,,,,,,,p1:Nanami,350.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|350/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,305,24.0,state,,,,,,,,p2:Hippowdon,34.0,420.0,tox,False,PokemonSwitched,,nan,nan,"|switch|p2a: Hippowdon|Hippowdon, F|34/420 tox",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,306,24.0,state,,,,,,,,p2:Hippowdon,8.0,420.0,tox,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Hippowdon|8/420 tox|[from] Stealth Rock,-26.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,306,24.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,26.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Hippowdon|8/420 tox|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,309,25.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p2:Hippowdon,Body Slam,309.0,,,,,,,,,
+smogtours-gen5ou-59402,310,25.0,state,,,,,,,,p2:Hippowdon,0.0,420.0,fnt,True,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Hippowdon|0 fnt,-8.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,310,25.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Hippowdon,8.0,,direct_move,p1:Nanami,nan,,|-damage|p2a: Hippowdon|0 fnt,"{""tags"": []}"
+smogtours-gen5ou-59402,311,25.0,state,,,,,,,,p2:Hippowdon,0.0,420.0,,True,PokemonFainted,,nan,nan,|faint|p2a: Hippowdon,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,313,25.0,state,,,,,,,,p1:Nanami,375.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|375/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,314,25.0,state,,,,,,,,p2:Stoutland,312.0,312.0,,False,PokemonSwitched,,nan,nan,"|switch|p2a: Stoutland|Stoutland, F|312/312",0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,315,25.0,state,,,,,,,,p2:Stoutland,273.0,312.0,,False,DamageApplied,,Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}",|-damage|p2a: Stoutland|273/312|[from] Stealth Rock,-39.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,315,25.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Stoutland,39.0,Stealth Rock,hazard,,nan,Stealth Rock,|-damage|p2a: Stoutland|273/312|[from] Stealth Rock,"{""tags"": [""[from] Stealth Rock""], ""from"": ""Stealth Rock""}"
+smogtours-gen5ou-59402,317,26.0,move,,,,,,,,,,,,,,,,,,,p2:Stoutland,p1:Nanami,Superpower,317.0,,,,,,,,,
+smogtours-gen5ou-59402,318,26.0,state,,,,,,,,p1:Nanami,194.0,403.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p1a: Nanami|194/403,-181.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,318,26.0,damage,,,,,,,,,,,,,,,,,,,,,,,p1:Nanami,181.0,,direct_move,p2:Stoutland,nan,,|-damage|p1a: Nanami|194/403,"{""tags"": []}"
+smogtours-gen5ou-59402,321,26.0,state,,,,,,,,p2:Stoutland,242.0,312.0,,False,DamageApplied,,item: Life Orb,"{""tags"": [""[from] item: Life Orb""], ""from"": ""item: Life Orb""}",|-damage|p2a: Stoutland|242/312|[from] item: Life Orb,-31.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,321,26.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Stoutland,31.0,item: Life Orb,item,,nan,item: Life Orb,|-damage|p2a: Stoutland|242/312|[from] item: Life Orb,"{""tags"": [""[from] item: Life Orb""], ""from"": ""item: Life Orb""}"
+smogtours-gen5ou-59402,322,26.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p2:Stoutland,Body Slam,322.0,,,,,,,,,
+smogtours-gen5ou-59402,323,26.0,state,,,,,,,,p2:Stoutland,126.0,312.0,,False,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Stoutland|126/312,-116.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,323,26.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Stoutland,116.0,,direct_move,p1:Nanami,nan,,|-damage|p2a: Stoutland|126/312,"{""tags"": []}"
+smogtours-gen5ou-59402,324,26.0,state,,,,,,,,p2:Stoutland,,312.0,par,False,StatusApplied,par,nan,"{""tags"": []}",|-status|p2a: Stoutland|par,0.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,326,26.0,state,,,,,,,,p1:Nanami,219.0,403.0,,False,HealApplied,,item: Leftovers,"{""tags"": [""[from] item: Leftovers""], ""from"": ""item: Leftovers""}",|-heal|p1a: Nanami|219/403|[from] item: Leftovers,25.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,328,27.0,move,,,,,,,,,,,,,,,,,,,p1:Nanami,p2:Stoutland,Iron Head,328.0,,,,,,,,,
+smogtours-gen5ou-59402,329,27.0,state,,,,,,,,p2:Stoutland,0.0,312.0,fnt,True,DamageApplied,,nan,"{""tags"": []}",|-damage|p2a: Stoutland|0 fnt,-126.0,,,,,,,,,,,,,
+smogtours-gen5ou-59402,329,27.0,damage,,,,,,,,,,,,,,,,,,,,,,,p2:Stoutland,126.0,,direct_move,p1:Nanami,nan,,|-damage|p2a: Stoutland|0 fnt,"{""tags"": []}"
+smogtours-gen5ou-59402,330,27.0,state,,,,,,,,p2:Stoutland,0.0,312.0,,True,PokemonFainted,,nan,nan,|faint|p2a: Stoutland,0.0,,,,,,,,,,,,,

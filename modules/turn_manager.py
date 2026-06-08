@@ -164,6 +164,9 @@ class SequentialTurnManager(TurnManager):
 
                 # ── 턴 실행 (TurnExecutor 위임) ──
                 self.turn_executor.execute(ctx, self.registry)
+                
+                if self.broadcast_phase_event:
+                    self.broadcast_phase_event("ACTION_END", ctx)
 
                 def _emit_turn_end(_ctx):
                     if self.broadcast_phase_event:

@@ -452,6 +452,191 @@ def _filter_state_snapshots_for_participants(snapshots, participant_ids):
             filtered[turn] = fsnap
     return filtered
 
+def build_observed_status_trace_from_group(group, log_schema):
+    if not log_schema.get("observed_status_trace_enabled"):
+        return []
+
+    event_type_col = log_schema.get("status_event_type_col")
+    entity_id_col = log_schema.get("status_entity_id_col")
+    status_val_col = log_schema.get("status_value_col")
+    status_effect_col = log_schema.get("status_effect_col")
+    turn_col = log_schema.get("status_turn_col") or log_schema.get("turn_col")
+
+    if not event_type_col or not entity_id_col or not turn_col:
+        return []
+
+    trace = []
+    for _, row in group.iterrows():
+        etype = str(row.get(event_type_col, "")).strip()
+        if etype not in ("StatusApplied", "StatusCured"):
+            continue
+
+        turn_val = row.get(turn_col)
+        turn = _coerce_turn(turn_val)
+        if turn is None:
+            continue
+
+        pid_raw = row.get(entity_id_col)
+        if _is_empty_id(pid_raw):
+            continue
+        pid = str(pid_raw).strip()
+
+        op = "apply" if etype == "StatusApplied" else "clear"
+        status_val = ""
+        if op == "apply":
+            status_val = str(row.get(status_val_col, "")).strip()
+            if not status_val or status_val == "nan":
+                status_val = str(row.get(status_effect_col, "")).strip()
+            if status_val == "nan":
+                status_val = ""
+        else:
+            status_val = ""
+
+        trace.append({
+            "turn": turn,
+            "entity_id": pid,
+            "status": status_val,
+            "op": op
+        })
+
+    return trace
+
+def _filter_observed_status_trace_for_participants(trace, participant_ids):
+    return [e for e in trace if e["entity_id"] in participant_ids]
+
+def build_observed_hp_trace_from_group(group, log_schema):
+    if not log_schema.get("observed_hp_trace_enabled"):
+        return []
+
+    event_type_col = log_schema.get("hp_event_type_col")
+    entity_id_col = log_schema.get("hp_entity_id_col")
+    val_col = log_schema.get("hp_value_col")
+    max_col = log_schema.get("hp_max_col")
+    fainted_col = log_schema.get("hp_fainted_col")
+    turn_col = log_schema.get("hp_turn_col") or log_schema.get("turn_col")
+    order_col = log_schema.get("hp_order_col")
+
+    if not event_type_col or not entity_id_col or not turn_col:
+        return []
+
+    trace = []
+    for _, row in group.iterrows():
+        etype = str(row.get(event_type_col, "")).strip()
+        if etype not in ("PokemonSwitched", "DamageApplied", "HealApplied", "PokemonFainted"):
+            continue
+
+        turn_val = row.get(turn_col)
+        turn = _coerce_turn(turn_val)
+        if turn is None:
+            continue
+
+        pid_raw = row.get(entity_id_col)
+        if _is_empty_id(pid_raw):
+            continue
+        pid = str(pid_raw).strip()
+
+        entry = {
+            "turn": turn,
+            "entity_id": pid,
+            "event_type": etype,
+            "seq": row.get(order_col, 0) if order_col and order_col in row else 0
+        }
+
+        if val_col and val_col in row and not pd.isna(row.get(val_col)):
+            entry["hp"] = float(row.get(val_col))
+        
+        if max_col and max_col in row and not pd.isna(row.get(max_col)):
+            entry["hp_max"] = float(row.get(max_col))
+            
+        is_faint = False
+        if etype == "PokemonFainted":
+            is_faint = True
+        elif fainted_col and fainted_col in row:
+            fval = row.get(fainted_col)
+            if not _is_empty_id(fval):
+                is_faint = str(fval).strip().lower() in {"1", "true", "yes", "y", "fainted", "dead", "ko", "down", "기절", "쓰러짐", "사망"}
+        
+        if is_faint:
+            entry["fainted"] = True
+            
+        trace.append(entry)
+
+    trace.sort(key=lambda x: (x["turn"], x["seq"]))
+    return trace
+
+def _filter_observed_hp_trace_for_participants(trace, participant_ids):
+    return [e for e in trace if e["entity_id"] in participant_ids]
+
+def build_observed_switch_trace_from_group(group, log_schema):
+    if not log_schema.get("observed_switch_trace_enabled"):
+        return {"switch": {}, "faint_incoming": []}
+
+    event_type_col = log_schema.get("switch_event_type_col")
+    entity_id_col = log_schema.get("switch_entity_id_col")
+    turn_col = log_schema.get("switch_turn_col") or log_schema.get("turn_col")
+    order_col = log_schema.get("switch_order_col")
+
+    if not event_type_col or not entity_id_col or not turn_col:
+        return {"switch": {}, "faint_incoming": []}
+
+    trace = {"switch": {}, "faint_incoming": []}
+    
+    events = []
+    for _, row in group.iterrows():
+        etype = str(row.get(event_type_col, "")).strip()
+        turn_val = row.get(turn_col)
+        turn = _coerce_turn(turn_val)
+        pid_raw = row.get(entity_id_col)
+        pid = str(pid_raw).strip() if not _is_empty_id(pid_raw) else ""
+        
+        seq = row.get(order_col, 0) if order_col and order_col in row else 0
+        events.append({
+            "turn": turn,
+            "seq": seq,
+            "event_type": etype,
+            "entity_id": pid
+        })
+        
+    events.sort(key=lambda x: (x["turn"] if x["turn"] is not None else -1, x["seq"]))
+    
+    active_by_side = {}
+    fainted_entities = set()
+    
+    for ev in events:
+        pid = ev["entity_id"]
+        if not pid:
+            continue
+            
+        parts = pid.split(":")
+        side = parts[0] if len(parts) > 1 else "unknown"
+        
+        etype = ev["event_type"]
+        turn = ev["turn"]
+        
+        if etype == "PokemonFainted":
+            fainted_entities.add(pid)
+            
+        elif etype == "PokemonSwitched":
+            if turn is None or turn <= 0:
+                active_by_side[side] = pid
+            else:
+                outgoing = active_by_side.get(side)
+                incoming = pid
+                
+                if outgoing and outgoing != incoming:
+                    if outgoing in fainted_entities:
+                        trace["faint_incoming"].append({
+                            "turn": turn,
+                            "outgoing": outgoing,
+                            "incoming": incoming
+                        })
+                    else:
+                        trace["switch"][(turn, outgoing)] = incoming
+                
+                active_by_side[side] = incoming
+
+    return trace
+
 def build_action_damage_trace_from_group(group, log_schema):
     if not log_schema.get("damage_trace_enabled"):
         return []
@@ -841,6 +1026,13 @@ def build_battles_from_log_schema(df, target_col, system_stats, system_gimmicks,
         if log_schema.get("trace_faint_incoming_enabled"):
             faint_incoming = build_faint_incoming_trace_from_group(group, log_schema)
             
+        if log_schema.get("observed_switch_trace_enabled"):
+            obs_switch = build_observed_switch_trace_from_group(group, log_schema)
+            if obs_switch:
+                faint_incoming.extend(obs_switch.get("faint_incoming", []))
+                for k, v in obs_switch.get("switch", {}).items():
+                    trace_actions["switch"][k] = v
+            
         state_snapshots = {}
         if log_schema.get("state_trace_enabled"):
             state_snapshots = build_state_snapshots_from_group(group, log_schema)
@@ -852,8 +1044,16 @@ def build_battles_from_log_schema(df, target_col, system_stats, system_gimmicks,
         action_resource_delta_trace = []
         if log_schema.get("resource_delta_trace_enabled"):
             action_resource_delta_trace = build_action_resource_delta_trace_from_group(group, log_schema)
+            
+        observed_status_trace = []
+        if log_schema.get("observed_status_trace_enabled"):
+            observed_status_trace = build_observed_status_trace_from_group(group, log_schema)
+            
+        observed_hp_trace = []
+        if log_schema.get("observed_hp_trace_enabled"):
+            observed_hp_trace = build_observed_hp_trace_from_group(group, log_schema)
                 
-        if trace_actions["move"] or trace_actions["switch"] or faint_incoming or initial_applied or state_snapshots or action_damage_trace or action_resource_delta_trace:
+        if trace_actions["move"] or trace_actions["switch"] or faint_incoming or initial_applied or state_snapshots or action_damage_trace or action_resource_delta_trace or observed_status_trace or observed_hp_trace:
             participant_ids = _participant_ids(ally_team, enemy_team)
             
             battle_gc = {"preserve_ids": True}
@@ -894,6 +1094,18 @@ def build_battles_from_log_schema(df, target_col, system_stats, system_gimmicks,
                     "strict_extra": bool(log_schema.get("resource_delta_strict_extra", False)),
                 }
                 has_battle_gc = True
+                
+            if observed_status_trace:
+                filtered_observed_status = _filter_observed_status_trace_for_participants(observed_status_trace, participant_ids)
+                if filtered_observed_status:
+                    battle_gc["_observed_status_trace"] = filtered_observed_status
+                    has_battle_gc = True
+                    
+            if observed_hp_trace:
+                filtered_observed_hp = _filter_observed_hp_trace_for_participants(observed_hp_trace, participant_ids)
+                if filtered_observed_hp:
+                    battle_gc["_observed_hp_trace"] = filtered_observed_hp
+                    has_battle_gc = True
                 
             if len(participant_ids) >= (len(ally_team) + len(enemy_team)):
                 filtered_trace = _filter_trace_actions_for_participants(trace_actions, participant_ids)

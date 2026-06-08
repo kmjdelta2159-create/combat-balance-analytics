@@ -316,10 +316,79 @@ def test_scenario_f():
     
     print("Scenario F (build_battles switch/faint) OK")
 
+def test_scenario_g_replay_stack():
+    from modules.showdown_db_adapter import generate_schema
+    
+    schema = generate_schema()
+    log_schema = schema["log_schema"]
+    
+    assert log_schema.get("observed_status_trace_enabled") is True
+    assert log_schema.get("observed_hp_trace_enabled") is True
+    assert log_schema.get("observed_status_trace_enabled") is True
+    assert log_schema.get("observed_hp_trace_enabled") is True
+    assert log_schema.get("observed_switch_trace_enabled") is True
+    
+    print("Scenario G (replay stack lock) OK")
+
+def test_scenario_h_multi_battle_replay_stack():
+    import pandas as pd
+    from modules.per_battle_backtest import build_battles
+    from modules.showdown_db_adapter import generate_schema
+    
+    schema = generate_schema()
+    log_schema = schema["log_schema"]
+    
+    df = pd.DataFrame([
+        # Battle 1
+        {"battle_id": "B1", "result": 1, "turn_no": 1, "seq": 1, "state_event_type": "PokemonSwitched", "team": "ally", "entity_id": "p1:A", "state_entity_id": "p1:A", "hp_current": 100},
+        {"battle_id": "B1", "result": 1, "turn_no": 1, "seq": 2, "state_event_type": "PokemonSwitched", "team": "enemy", "entity_id": "p2:B", "state_entity_id": "p2:B", "hp_current": 100},
+        {"battle_id": "B1", "result": 1, "turn_no": 2, "seq": 3, "state_event_type": "StatusApplied", "team": "ally", "entity_id": "p1:A", "state_entity_id": "p1:A", "hp_status": "tox"},
+        {"battle_id": "B1", "result": 1, "turn_no": 2, "seq": 4, "state_event_type": "DamageApplied", "team": "ally", "entity_id": "p1:A", "state_entity_id": "p1:A", "hp_current": 50},
+        {"battle_id": "B1", "result": 1, "turn_no": 3, "seq": 5, "state_event_type": "PokemonSwitched", "team": "ally", "entity_id": "p1:C", "state_entity_id": "p1:C", "hp_current": 100},
+        
+        # Battle 2
+        {"battle_id": "B2", "result": 0, "turn_no": 1, "seq": 1, "state_event_type": "PokemonSwitched", "team": "ally", "entity_id": "p1:X", "state_entity_id": "p1:X", "hp_current": 100},
+        {"battle_id": "B2", "result": 0, "turn_no": 1, "seq": 2, "state_event_type": "PokemonSwitched", "team": "enemy", "entity_id": "p2:Y", "state_entity_id": "p2:Y", "hp_current": 100},
+        {"battle_id": "B2", "result": 0, "turn_no": 2, "seq": 3, "state_event_type": "StatusApplied", "team": "enemy", "entity_id": "p2:Y", "state_entity_id": "p2:Y", "hp_status": "brn"},
+        {"battle_id": "B2", "result": 0, "turn_no": 2, "seq": 4, "state_event_type": "DamageApplied", "team": "enemy", "entity_id": "p2:Y", "state_entity_id": "p2:Y", "hp_current": 20},
+        {"battle_id": "B2", "result": 0, "turn_no": 3, "seq": 5, "state_event_type": "PokemonSwitched", "team": "enemy", "entity_id": "p2:Z", "state_entity_id": "p2:Z", "hp_current": 100},
+    ])
+    
+    # We must add extra columns expected by schema
+    df["actor_name"] = None
+    df["actor_id"] = None
+    df["target_id"] = None
+    df["target_name"] = None
+    df["move_name"] = None
+    df["hp_max"] = 100
+    df["event_type"] = None
+    
+    battles = build_battles(df, 1, "result", ["hp_current"], [], "hp_current", max_battles=10, game_config={"preserve_ids": True}, log_schema=log_schema)
+    assert len(battles) == 2
+    
+    gc1 = battles[0][3]
+    gc2 = battles[1][3]
+    
+    # Verify B1
+    assert len(gc1["_observed_status_trace"]) == 1
+    assert gc1["_observed_status_trace"][0]["status"] == "tox"
+    assert any(t.get("hp") == 50 for t in gc1["_observed_hp_trace"])
+    assert (3, "p1:A") in gc1["trace_actions"]["switch"]
+    
+    # Verify B2
+    assert len(gc2["_observed_status_trace"]) == 1
+    assert gc2["_observed_status_trace"][0]["status"] == "brn"
+    assert any(t.get("hp") == 20 for t in gc2["_observed_hp_trace"])
+    assert (3, "p2:Y") in gc2["trace_actions"]["switch"]
+    
+    print("Scenario H (multi battle replay stack) OK")
+
 if __name__ == "__main__":
     test_syntax()
     test_scenario_a_and_b()
     test_scenario_c()
     test_scenario_d_and_e()
     test_scenario_f()
+    test_scenario_g_replay_stack()
+    test_scenario_h_multi_battle_replay_stack()
     print("All smoke tests passed!")

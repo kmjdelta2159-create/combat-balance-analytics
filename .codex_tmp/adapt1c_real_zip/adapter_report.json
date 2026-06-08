@@ -1,0 +1,47 @@
+{
+  "source_kind": "pokemon_showdown_db_extract",
+  "battle_count": 1,
+  "event_count": 343,
+  "participant_count": 12,
+  "move_count": 36,
+  "state_event_count": 122,
+  "damage_event_count": 54,
+  "winner_side": "p1",
+  "winner_sides": {
+    "smogtours-gen5ou-59402": "p1"
+  },
+  "warnings": [],
+  "roster_only_entities": [
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "species": "Politoed"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "species": "Jirachi"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "species": "Breloom"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "species": "Garchomp"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "species": "Zapdos"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "species": "Tentacruel"
+    }
+  ],
+  "unknown_damage_actor_count": 29
+}

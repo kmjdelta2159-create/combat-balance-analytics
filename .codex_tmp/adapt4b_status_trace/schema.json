@@ -1,0 +1,63 @@
+{
+  "system_stats": [
+    "HP"
+  ],
+  "system_gimmicks": [
+    "species"
+  ],
+  "health_stat": "HP",
+  "target_col": "result",
+  "battle_size": 2,
+  "global_damage_formula": "0",
+  "sim_max_turns": 100,
+  "log_schema": {
+    "battle_id_col": "battle_id",
+    "team_col": "team",
+    "entity_id_col": "entity_id",
+    "sort_cols": [
+      "seq"
+    ],
+    "result_mode": "battle_level",
+    "ally_values": [
+      "ally"
+    ],
+    "enemy_values": [
+      "enemy"
+    ],
+    "initial_on_field_enabled": true,
+    "initial_on_field_col": "initial_on_field",
+    "initial_on_field_values": [
+      "true",
+      "1",
+      "yes",
+      "lead",
+      true
+    ],
+    "trace_moves_enabled": true,
+    "turn_col": "turn_no",
+    "actor_id_col": "move_actor_id",
+    "target_id_col": "move_target_id",
+    "move_name_col": "move_name",
+    "move_order_col": "move_order",
+    "move_order_direction": "ascending_first",
+    "action_col": "row_kind",
+    "move_action_values": [
+      "move"
+    ],
+    "state_trace_enabled": true,
+    "state_turn_col": "turn_no",
+    "state_entity_id_col": "state_entity_id",
+    "state_hp_col": "hp_current",
+    "state_status_col": "hp_status",
+    "state_fainted_col": "fainted",
+    "state_hp_mode": "absolute",
+    "state_hp_tolerance": 0.0,
+    "damage_trace_enabled": false,
+    "observed_status_trace_enabled": true,
+    "status_event_type_col": "state_event_type",
+    "status_entity_id_col": "state_entity_id",
+    "status_value_col": "hp_status",
+    "status_effect_col": "state_effect",
+    "status_turn_col": "turn_no"
+  }
+}

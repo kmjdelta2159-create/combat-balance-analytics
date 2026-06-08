@@ -1,0 +1,26 @@
+{
+  "is_parity": true,
+  "formats_compared": [
+    "db",
+    "folder",
+    "zip"
+  ],
+  "reference_values": {
+    "battle_count": 2,
+    "participant_count": 24,
+    "state_event_count": 244,
+    "damage_event_count": 108,
+    "winner_sides": {
+      "smogtours-gen5ou-59402": "p1",
+      "smogtours-gen5ou-59402_copy": "p1"
+    },
+    "roster_only_entities": [],
+    "backtest": {
+      "actual_count": 2,
+      "predicted_count": 2,
+      "accuracy_pct": 100.0,
+      "outcome_mismatches": 0,
+      "state_mismatches": 0
+    }
+  }
+}

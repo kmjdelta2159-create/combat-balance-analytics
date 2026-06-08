@@ -328,11 +328,11 @@ def main():
         df_out.to_csv(out_csv, index=False, encoding="utf-8-sig")
 
         with open(out_md, 'w', encoding='utf-8') as f:
-            f.write("# DB 로그 코퍼스 백테스트 리포트\n\n")
-            f.write("- 이 리포트는 DB 로그 기반 코퍼스 검증 리포트다.\n")
-            f.write("- HTML 리플레이 검증은 별도 legacy/reference harness이며 주 경로가 아니다.\n")
-            f.write("- 결측 컬럼/schema 문제는 엔진 결함이 아니라 입력 매핑 문제로 분리한다.\n")
-            f.write("- mismatch는 복제본과 관측 DB 로그가 갈라진 첫 지점이다.\n\n")
+            f.write("# DB Corpus Backtest Report\n\n")
+            f.write("- This is a DB-log-based corpus validation report.\n")
+            f.write("- HTML replay validation is a separate legacy/reference harness and not the main path.\n")
+            f.write("- Missing columns or schema issues are isolated as input mapping problems, not engine defects.\n")
+            f.write("- 'Mismatch' indicates the first point of divergence between the replay and the observed DB log.\n\n")
             md_str = "|" + "|".join(df_out.columns) + "|\n"
             md_str += "|" + "|".join(["---"] * len(df_out.columns)) + "|\n"
             for _, row in df_out.iterrows():

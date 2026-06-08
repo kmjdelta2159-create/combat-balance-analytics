@@ -1,0 +1,39 @@
+{
+  "version": "db_corpus_fixture_manifest.v1",
+  "cases": [
+    {
+      "name": "basic_damage_pass",
+      "schema": "basic_damage_pass/schema.json",
+      "logs": ["basic_damage_pass/battle_log.csv"],
+      "expected": {
+        "status": "ran",
+        "formula": "999",
+        "speed_stat": "SPD",
+        "action_damage_mismatches": 0,
+        "outcome_mismatches": 0,
+        "next_action": "passed_or_low_mismatch"
+      }
+    },
+    {
+      "name": "outcome_mismatch_triage",
+      "schema": "outcome_mismatch_triage/schema.json",
+      "logs": ["outcome_mismatch_triage/battle_log.csv"],
+      "expected": {
+        "status": "ran",
+        "action_damage_mismatches": 0,
+        "outcome_mismatches": ">0",
+        "next_action": "inspect_outcome_mismatch"
+      }
+    },
+    {
+      "name": "resource_delta_trace_pass",
+      "schema": "resource_delta_trace_pass/schema.json",
+      "logs": ["resource_delta_trace_pass/battle_log.csv"],
+      "expected": {
+        "status": "ran",
+        "action_resource_delta_mismatches": 0,
+        "next_action": "inspect_outcome_mismatch"
+      }
+    }
+  ]
+}

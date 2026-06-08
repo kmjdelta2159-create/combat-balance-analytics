@@ -1,0 +1,12 @@
+[
+  {
+    "input_path": ".codex_tmp/adapt8_multi_battle_replay/pokemon_showdown_multi.db",
+    "status": "ran",
+    "input_kind": "replicated_fixture"
+  },
+  {
+    "input_path": ".codex_tmp/adapt8_multi_battle_replay/input_zip.zip",
+    "status": "ran",
+    "input_kind": "replicated_fixture"
+  }
+]

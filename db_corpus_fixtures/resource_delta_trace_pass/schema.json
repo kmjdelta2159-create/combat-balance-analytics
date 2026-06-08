@@ -1,0 +1,42 @@
+{
+  "system_stats": ["HP", "SPD", "Shield"],
+  "system_gimmicks": [],
+  "health_stat": "HP",
+  "target_col": "result",
+  "battle_size": 2,
+  "speed_stat": "SPD",
+  "global_damage_formula": "30",
+  "sim_max_turns": 1,
+  "game_config": {"preserve_ids": true, "preserve_initial_on_field": true},
+  "resource_config": {
+    "HP": {"role": "vital", "stat": "HP", "regen": 0.0},
+    "Shield": {"role": "shield", "stat": "Shield", "regen": 0.0}
+  },
+  "log_schema": {
+    "battle_id_col": "battle_id",
+    "team_col": "team",
+    "entity_id_col": "entity_id",
+    "result_mode": "battle_level",
+    "ally_values": ["Ally"],
+    "enemy_values": ["Enemy"],
+    "initial_on_field_enabled": true,
+    "initial_on_field_col": "team",
+    "initial_on_field_values": ["Ally", "Enemy"],
+    "trace_moves_enabled": true,
+    "turn_col": "turn",
+    "actor_id_col": "actor",
+    "target_id_col": "target",
+    "move_name_col": "move",
+    "resource_delta_trace_enabled": true,
+    "resource_delta_turn_col": "turn",
+    "resource_delta_actor_id_col": "actor",
+    "resource_delta_target_id_col": "target",
+    "resource_delta_action_col": "event",
+    "resource_delta_action_values": ["damage"],
+    "resource_delta_cols": {
+      "HP": "hp_loss",
+      "Shield": "shield_loss"
+    },
+    "resource_delta_strict_extra": false
+  }
+}

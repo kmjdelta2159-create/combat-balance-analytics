@@ -31,10 +31,176 @@ if 'system_stats' not in st.session_state:
 
 st.markdown("""
 <style>
-    [data-testid="stAppViewContainer"] { background-color: #0E1117; }
-    [data-testid="stSidebar"] { background-color: #161A22; border-right: 1px solid #2D333B; }
-    h1, h2, h3, h4, h5, h6, span, p, label { color: #E6EDF3 !important; font-family: 'Inter', sans-serif; }
-    .stDataFrame { border-radius: 8px; overflow: hidden; border: 1px solid #30363D; }
+    /* Semantic color tokens */
+    :root {
+        --app-bg: #0e1117;
+        --sidebar-bg: #161a22;
+        --panel-bg: #111827;
+        --surface-light: #f8fafc;
+        
+        --text-on-dark: #f8fafc;
+        --text-secondary-on-dark: #d1d5db;
+        --text-muted-on-dark: #b8c0cc;
+        --text-disabled-on-dark: #a7b0be;
+        
+        --text-on-light: #111827;
+        --text-muted-on-light: #4b5563;
+        --border-subtle: #30363d;
+    }
+
+    /* Core backgrounds and primary text */
+    [data-testid="stAppViewContainer"] { background-color: var(--app-bg); color: var(--text-on-dark); }
+    [data-testid="stSidebar"] { background-color: var(--sidebar-bg); border-color: var(--border-subtle); }
+    
+    /* 1. 어두운 앱 배경 위 텍스트 */
+    h1, h2, h3, h4, h5, h6 { color: var(--text-on-dark) !important; }
+    .stMarkdown p, .stMarkdown ul, .stMarkdown ol, [data-testid="stText"] p { color: var(--text-on-dark) !important; }
+    [data-testid="stAppViewContainer"] label { color: var(--text-on-dark) !important; }
+    
+    small, 
+    [data-testid="stCaptionContainer"] p, 
+    [data-testid="stSidebar"] p, 
+    [data-testid="stMarkdownContainer"] small,
+    [data-testid="stTab"] p { 
+        color: var(--text-secondary-on-dark) !important; 
+    }
+
+    [data-testid="stExpander"] summary p,
+    [data-testid="stToggle"] label p,
+    [data-testid="stCheckbox"] label p,
+    [data-testid="stRadio"] label p { 
+        color: var(--text-on-dark); 
+    }
+
+    [data-testid="stTab"][aria-selected="true"] p {
+        color: var(--text-on-dark);
+    }
+
+    [data-testid="stMetricValue"] { color: var(--text-on-dark); }
+    [data-testid="stMetricValue"] > div { color: var(--text-on-dark); }
+    [data-testid="stMetricLabel"] { color: var(--text-secondary-on-dark); }
+    [data-testid="stMetricLabel"] > div > div > p { color: var(--text-secondary-on-dark); }
+
+    /* 2. 밝은 form surface 위 텍스트 (텍스트 색만 변경) */
+    input, 
+    textarea, 
+    [data-baseweb="input"] input, 
+    [data-baseweb="textarea"] textarea, 
+    [data-baseweb="base-input"] input,
+    [data-baseweb="base-input"] textarea,
+    [data-testid="stSelectbox"] input, 
+    [data-testid="stTextInput"] input, 
+    [data-testid="stTextArea"] textarea, 
+    [data-testid="stNumberInput"] input, 
+    [data-testid="stFileUploader"] button {
+        color: var(--text-on-light) !important;
+        caret-color: var(--text-on-light) !important;
+    }
+    
+    input::placeholder, 
+    textarea::placeholder {
+        color: var(--text-muted-on-light) !important;
+    }
+    
+    /* Selectbox 내부 값 및 multiselect tag (chip), 그리고 pills */
+    [data-baseweb="select"] div[aria-selected="true"],
+    [data-baseweb="select"] span[title],
+    [data-baseweb="tag"] span,
+    [data-testid="stPills"] button,
+    [data-testid="stPills"] span,
+    [data-testid="stPills"] p,
+    [data-baseweb="pill"] span {
+        color: var(--text-on-light) !important;
+    }
+
+    /* 3. disabled 상태 (opacity 제외, 텍스트가 읽히도록 유지) */
+    /* Formula variable chips: Streamlit may render pills as buttons, labels, or radio wrappers. */
+    [data-testid="stPills"] button,
+    [data-testid="stPills"] label,
+    [data-testid="stPills"] [role="button"],
+    [data-testid="stPills"] [role="radio"],
+    [data-testid="stPills"] [data-baseweb="radio"],
+    [class*="formula_chip_selector"] button,
+    [class*="formula_chip_selector"] label,
+    [class*="formula_chip_selector"] [role="button"],
+    [class*="formula_chip_selector"] [role="radio"],
+    [class*="formula_chip_selector"] [data-baseweb="radio"] {
+        background-color: #f8fafc !important;
+        border: 1px solid #94a3b8 !important;
+        color: #111827 !important;
+        -webkit-text-fill-color: #111827 !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+        filter: none !important;
+        mix-blend-mode: normal !important;
+    }
+    [data-testid="stPills"] *,
+    [class*="formula_chip_selector"] * {
+        color: #111827 !important;
+        -webkit-text-fill-color: #111827 !important;
+        opacity: 1 !important;
+        text-shadow: none !important;
+        filter: none !important;
+        mix-blend-mode: normal !important;
+    }
+    [data-testid="stPills"] button[aria-selected="true"],
+    [data-testid="stPills"] button[aria-pressed="true"],
+    [data-testid="stPills"] [role="button"][aria-selected="true"],
+    [data-testid="stPills"] [role="radio"][aria-checked="true"],
+    [data-testid="stPills"] label:has(input:checked),
+    [class*="formula_chip_selector"] button[aria-selected="true"],
+    [class*="formula_chip_selector"] button[aria-pressed="true"],
+    [class*="formula_chip_selector"] [role="button"][aria-selected="true"],
+    [class*="formula_chip_selector"] [role="radio"][aria-checked="true"],
+    [class*="formula_chip_selector"] label:has(input:checked) {
+        background-color: #2563eb !important;
+        border-color: #60a5fa !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }
+    [data-testid="stPills"] button[aria-selected="true"] *,
+    [data-testid="stPills"] button[aria-pressed="true"] *,
+    [data-testid="stPills"] [role="button"][aria-selected="true"] *,
+    [data-testid="stPills"] [role="radio"][aria-checked="true"] *,
+    [data-testid="stPills"] label:has(input:checked) *,
+    [class*="formula_chip_selector"] button[aria-selected="true"] *,
+    [class*="formula_chip_selector"] button[aria-pressed="true"] *,
+    [class*="formula_chip_selector"] [role="button"][aria-selected="true"] *,
+    [class*="formula_chip_selector"] [role="radio"][aria-checked="true"] *,
+    [class*="formula_chip_selector"] label:has(input:checked) * {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }
+
+    button:disabled,
+    [data-testid="stButton"] button:disabled,
+    [data-testid="stFormSubmitButton"] button:disabled,
+    [aria-disabled="true"],
+    [data-disabled="true"],
+    input:disabled,
+    textarea:disabled { 
+        color: var(--text-disabled-on-dark) !important;
+        border-color: var(--border-subtle) !important;
+    }
+    
+    [data-testid="stCheckbox"] input:disabled ~ div, 
+    [data-testid="stToggle"] input:disabled ~ div { 
+        color: var(--text-disabled-on-dark) !important; 
+    }
+    
+    /* Dataframe and Tables */
+    [data-testid="stDataFrame"] th { color: var(--text-secondary-on-dark) !important; }
+    [data-testid="stDataFrame"] td { color: var(--text-on-light) !important; }
+
+    /* Buttons */
+    [data-testid="stButton"] button { color: var(--text-on-light) !important; }
+
+    /* File uploader visibility */
+    [data-testid="stFileUploader"] small { color: var(--text-muted-on-dark) !important; }
+    
+    /* Alerts and hints */
+    .stAlert p, .stAlert span, .stAlert div[data-testid="stMarkdownContainer"] p { color: var(--text-on-dark) !important; }
+    
     /* Hide Streamlit default sidebar nav if it somehow appears */
     [data-testid="stSidebarNav"] { display: none !important; }
     

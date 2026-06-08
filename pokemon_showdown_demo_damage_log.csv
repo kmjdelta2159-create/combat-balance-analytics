@@ -1,0 +1,501 @@
+﻿battle_id,turn,attacker_species,defender_species,move_name,Move_Power,Move_Type,Move_Category,Atk_Attack,Atk_SpAtk,Def_Defense,Def_SpDef,Atk_Type1,Atk_Type2,Def_Type1,Def_Type2,hp_before,hp_after,Damage,effect_hint
+smogtours-gen5ou-59402,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,60,Electric,Water,Grass,Fighting,307,69,238,super_effective
+smogtours-gen5ou-59402,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,100,Electric,Water,Steel,Psychic,403,253,150,normal
+smogtours-gen5ou-59402,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,100,Electric,Water,Steel,Psychic,278,193,85,normal
+smogtours-gen5ou-59402,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,95,85,Ground,,Dragon,Ground,420,294,126,normal
+smogtours-gen5ou-59402,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,95,85,Ground,,Dragon,Ground,420,236,184,super_effective
+smogtours-gen5ou-59402,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,75,100,Ground,,Water,,283,108,175,normal
+smogtours-gen5ou-59402,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,90,107,107,Water,,Electric,Water,238,159,79,resisted
+smogtours-gen5ou-59402,9,Rotom-Wash,Zapdos,Hydro Pump,120,Water,Special,65,105,85,90,Electric,Water,Electric,Flying,288,35,253,normal
+smogtours-gen5ou-59402,10,Zapdos,Rotom-Wash,Thunderbolt,95,Electric,Special,90,125,107,107,Electric,Flying,Electric,Water,93,0,93,normal
+smogtours-gen5ou-59402,11,Latios,Tentacruel,Draco Meteor,140,Dragon,Special,90,130,65,120,Dragon,Psychic,Water,Poison,318,318,0,miss
+smogtours-gen5ou-59402,12,Latios,Tentacruel,Draco Meteor,140,Dragon,Special,90,130,65,120,Dragon,Psychic,Water,Poison,362,35,327,normal
+smogtours-gen5ou-59402,12,Tentacruel,Latios,Rapid Spin,20,Normal,Physical,70,80,80,110,Water,Poison,Dragon,Psychic,266,253,13,normal
+smogtours-gen5ou-59402,13,Tentacruel,Hippowdon,Scald,80,Water,Special,70,80,118,72,Water,Poison,Ground,,272,60,212,super_effective
+smogtours-gen5ou-59402,14,Tentacruel,Ferrothorn,Scald,80,Water,Special,70,80,131,116,Water,Poison,Grass,Steel,330,304,26,resisted
+smogtours-gen5ou-59402,15,Ferrothorn,Politoed,Explosion,250,Normal,Physical,94,54,75,100,Grass,Steel,Water,,108,0,108,normal
+smogtours-gen5ou-59402,16,Garchomp,Latios,Earthquake,100,Ground,Physical,130,80,80,110,Dragon,Ground,Dragon,Psychic,215,215,0,immune
+smogtours-gen5ou-59402,17,Latios,Breloom,Draco Meteor,140,Dragon,Special,90,130,80,60,Dragon,Psychic,Grass,Fighting,69,0,69,normal
+smogtours-gen5ou-59402,19,Metagross,Jirachi,Explosion,250,Normal,Physical,135,95,100,100,Steel,Psychic,Steel,Psychic,243,243,0,protected
+smogtours-gen5ou-59402,21,Latios,Jirachi,Psyshock,80,Psychic,Special,90,130,100,100,Dragon,Psychic,Steel,Psychic,403,368,35,resisted
+smogtours-gen5ou-59402,22,Latios,Jirachi,Hidden Power,70,Fire,Special,90,130,100,100,Dragon,Psychic,Steel,Psychic,393,275,118,super_effective
+smogtours-gen5ou-59402,22,Jirachi,Latios,Body Slam,85,Normal,Physical,100,100,80,110,Steel,Psychic,Dragon,Psychic,139,64,75,normal
+smogtours-gen5ou-59402,23,Latios,Jirachi,Hidden Power,70,Fire,Special,90,130,100,100,Dragon,Psychic,Steel,Psychic,300,300,0,protected
+smogtours-gen5ou-59402,24,Jirachi,Latios,Iron Head,80,Steel,Physical,100,100,80,110,Steel,Psychic,Dragon,Psychic,64,0,64,normal
+smogtours-gen5ou-59402,25,Jirachi,Hippowdon,Body Slam,85,Normal,Physical,100,100,118,72,Steel,Psychic,Ground,,8,0,8,normal
+smogtours-gen5ou-59402,26,Stoutland,Jirachi,Superpower,120,Fighting,Physical,110,45,100,100,Normal,,Steel,Psychic,375,194,181,normal
+smogtours-gen5ou-59402,26,Jirachi,Stoutland,Body Slam,85,Normal,Physical,100,100,90,90,Steel,Psychic,Normal,,242,126,116,normal
+smogtours-gen5ou-59402,27,Jirachi,Stoutland,Iron Head,80,Steel,Physical,100,100,90,90,Steel,Psychic,Normal,,126,0,126,normal
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,48,Electric,Water,Grass,Fighting,292,116,176,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,48,Electric,Water,Grass,Fighting,307,124,183,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,48,Electric,Water,Grass,Fighting,322,133,189,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,54,Electric,Water,Grass,Fighting,338,180,158,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,54,Electric,Water,Grass,Fighting,276,113,163,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,54,Electric,Water,Grass,Fighting,292,123,169,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,60,Electric,Water,Grass,Fighting,307,165,142,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,60,Electric,Water,Grass,Fighting,322,175,147,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,60,Electric,Water,Grass,Fighting,338,186,152,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,66,Electric,Water,Grass,Fighting,276,147,129,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,66,Electric,Water,Grass,Fighting,292,159,133,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,66,Electric,Water,Grass,Fighting,307,169,138,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,72,Electric,Water,Grass,Fighting,322,203,119,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,72,Electric,Water,Grass,Fighting,338,215,123,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,84,80,72,Electric,Water,Grass,Fighting,276,149,127,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,48,Electric,Water,Grass,Fighting,292,94,198,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,48,Electric,Water,Grass,Fighting,307,102,205,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,48,Electric,Water,Grass,Fighting,322,110,212,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,54,Electric,Water,Grass,Fighting,338,162,176,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,54,Electric,Water,Grass,Fighting,276,93,183,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,54,Electric,Water,Grass,Fighting,292,103,189,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,60,Electric,Water,Grass,Fighting,307,148,159,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,60,Electric,Water,Grass,Fighting,322,157,165,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,60,Electric,Water,Grass,Fighting,338,167,171,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,66,Electric,Water,Grass,Fighting,276,132,144,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,66,Electric,Water,Grass,Fighting,292,143,149,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,66,Electric,Water,Grass,Fighting,307,153,154,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,72,Electric,Water,Grass,Fighting,322,190,132,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,72,Electric,Water,Grass,Fighting,338,201,137,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,94,80,72,Electric,Water,Grass,Fighting,276,135,141,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,48,Electric,Water,Grass,Fighting,292,71,221,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,48,Electric,Water,Grass,Fighting,307,79,228,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,48,Electric,Water,Grass,Fighting,322,86,236,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,54,Electric,Water,Grass,Fighting,338,141,197,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,54,Electric,Water,Grass,Fighting,276,72,204,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,54,Electric,Water,Grass,Fighting,292,81,211,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,60,Electric,Water,Grass,Fighting,307,131,176,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,60,Electric,Water,Grass,Fighting,322,139,183,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,60,Electric,Water,Grass,Fighting,338,149,189,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,66,Electric,Water,Grass,Fighting,276,115,161,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,66,Electric,Water,Grass,Fighting,292,125,167,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,66,Electric,Water,Grass,Fighting,307,135,172,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,72,Electric,Water,Grass,Fighting,322,175,147,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,72,Electric,Water,Grass,Fighting,338,185,153,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,105,80,72,Electric,Water,Grass,Fighting,276,118,158,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,48,Electric,Water,Grass,Fighting,292,48,244,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,48,Electric,Water,Grass,Fighting,307,54,253,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,48,Electric,Water,Grass,Fighting,322,60,262,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,54,Electric,Water,Grass,Fighting,338,121,217,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,54,Electric,Water,Grass,Fighting,276,51,225,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,54,Electric,Water,Grass,Fighting,292,60,232,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,60,Electric,Water,Grass,Fighting,307,112,195,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,60,Electric,Water,Grass,Fighting,322,120,202,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,60,Electric,Water,Grass,Fighting,338,129,209,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,66,Electric,Water,Grass,Fighting,276,98,178,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,66,Electric,Water,Grass,Fighting,292,108,184,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,66,Electric,Water,Grass,Fighting,307,116,191,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,72,Electric,Water,Grass,Fighting,322,159,163,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,72,Electric,Water,Grass,Fighting,338,170,168,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,116,80,72,Electric,Water,Grass,Fighting,276,102,174,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,48,Electric,Water,Grass,Fighting,292,27,265,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,48,Electric,Water,Grass,Fighting,307,33,274,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,48,Electric,Water,Grass,Fighting,322,39,283,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,54,Electric,Water,Grass,Fighting,338,102,236,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,54,Electric,Water,Grass,Fighting,276,32,244,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,54,Electric,Water,Grass,Fighting,292,40,252,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,60,Electric,Water,Grass,Fighting,307,95,212,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,60,Electric,Water,Grass,Fighting,322,102,220,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,60,Electric,Water,Grass,Fighting,338,111,227,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,66,Electric,Water,Grass,Fighting,276,83,193,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,66,Electric,Water,Grass,Fighting,292,92,200,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,66,Electric,Water,Grass,Fighting,307,100,207,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,72,Electric,Water,Grass,Fighting,322,146,176,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,72,Electric,Water,Grass,Fighting,338,155,183,super_effective
+smogtours-gen5ou-59402_aug,1,Rotom-Wash,Breloom,Hidden Power,70,Ice,Special,65,126,80,72,Electric,Water,Grass,Fighting,276,87,189,super_effective
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,80,Electric,Water,Steel,Psychic,383,247,136,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,80,Electric,Water,Steel,Psychic,403,262,141,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,80,Electric,Water,Steel,Psychic,423,277,146,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,90,Electric,Water,Steel,Psychic,443,321,122,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,90,Electric,Water,Steel,Psychic,363,237,126,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,90,Electric,Water,Steel,Psychic,383,252,131,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,100,Electric,Water,Steel,Psychic,403,294,109,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,100,Electric,Water,Steel,Psychic,423,310,113,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,100,Electric,Water,Steel,Psychic,443,326,117,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,110,Electric,Water,Steel,Psychic,363,264,99,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,110,Electric,Water,Steel,Psychic,383,281,102,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,110,Electric,Water,Steel,Psychic,403,297,106,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,120,Electric,Water,Steel,Psychic,423,332,91,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,120,Electric,Water,Steel,Psychic,443,348,95,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,84,100,120,Electric,Water,Steel,Psychic,363,265,98,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,80,Electric,Water,Steel,Psychic,383,230,153,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,80,Electric,Water,Steel,Psychic,403,245,158,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,80,Electric,Water,Steel,Psychic,423,260,163,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,90,Electric,Water,Steel,Psychic,443,307,136,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,90,Electric,Water,Steel,Psychic,363,222,141,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,90,Electric,Water,Steel,Psychic,383,237,146,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,100,Electric,Water,Steel,Psychic,403,281,122,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,100,Electric,Water,Steel,Psychic,423,297,126,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,100,Electric,Water,Steel,Psychic,443,312,131,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,110,Electric,Water,Steel,Psychic,363,251,112,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,110,Electric,Water,Steel,Psychic,383,267,116,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,110,Electric,Water,Steel,Psychic,403,283,120,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,120,Electric,Water,Steel,Psychic,423,321,102,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,120,Electric,Water,Steel,Psychic,443,338,105,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,94,100,120,Electric,Water,Steel,Psychic,363,254,109,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,80,Electric,Water,Steel,Psychic,383,213,170,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,80,Electric,Water,Steel,Psychic,403,227,176,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,80,Electric,Water,Steel,Psychic,423,241,182,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,90,Electric,Water,Steel,Psychic,443,292,151,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,90,Electric,Water,Steel,Psychic,363,206,157,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,90,Electric,Water,Steel,Psychic,383,221,162,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,100,Electric,Water,Steel,Psychic,403,267,136,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,100,Electric,Water,Steel,Psychic,423,282,141,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,100,Electric,Water,Steel,Psychic,443,297,146,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,110,Electric,Water,Steel,Psychic,363,239,124,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,110,Electric,Water,Steel,Psychic,383,254,129,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,110,Electric,Water,Steel,Psychic,403,270,133,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,120,Electric,Water,Steel,Psychic,423,309,114,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,120,Electric,Water,Steel,Psychic,443,325,118,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,105,100,120,Electric,Water,Steel,Psychic,363,241,122,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,80,Electric,Water,Steel,Psychic,383,195,188,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,80,Electric,Water,Steel,Psychic,403,208,195,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,80,Electric,Water,Steel,Psychic,423,221,202,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,90,Electric,Water,Steel,Psychic,443,276,167,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,90,Electric,Water,Steel,Psychic,363,191,172,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,90,Electric,Water,Steel,Psychic,383,205,178,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,100,Electric,Water,Steel,Psychic,403,253,150,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,100,Electric,Water,Steel,Psychic,423,268,155,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,100,Electric,Water,Steel,Psychic,443,282,161,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,110,Electric,Water,Steel,Psychic,363,226,137,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,110,Electric,Water,Steel,Psychic,383,241,142,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,110,Electric,Water,Steel,Psychic,403,256,147,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,120,Electric,Water,Steel,Psychic,423,297,126,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,120,Electric,Water,Steel,Psychic,443,313,130,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,116,100,120,Electric,Water,Steel,Psychic,363,228,135,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,80,Electric,Water,Steel,Psychic,383,179,204,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,80,Electric,Water,Steel,Psychic,403,192,211,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,80,Electric,Water,Steel,Psychic,423,205,218,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,90,Electric,Water,Steel,Psychic,443,261,182,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,90,Electric,Water,Steel,Psychic,363,175,188,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,90,Electric,Water,Steel,Psychic,383,188,195,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,100,Electric,Water,Steel,Psychic,403,239,164,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,100,Electric,Water,Steel,Psychic,423,253,170,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,100,Electric,Water,Steel,Psychic,443,267,176,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,110,Electric,Water,Steel,Psychic,363,214,149,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,110,Electric,Water,Steel,Psychic,383,229,154,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,110,Electric,Water,Steel,Psychic,403,244,159,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,120,Electric,Water,Steel,Psychic,423,287,136,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,120,Electric,Water,Steel,Psychic,443,302,141,normal
+smogtours-gen5ou-59402_aug,2,Rotom-Wash,Jirachi,Hydro Pump,120,Water,Special,65,126,100,120,Electric,Water,Steel,Psychic,363,217,146,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,80,Electric,Water,Steel,Psychic,264,184,80,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,80,Electric,Water,Steel,Psychic,278,195,83,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,80,Electric,Water,Steel,Psychic,292,207,85,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,90,Electric,Water,Steel,Psychic,306,235,71,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,90,Electric,Water,Steel,Psychic,250,177,73,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,90,Electric,Water,Steel,Psychic,264,188,76,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,100,Electric,Water,Steel,Psychic,278,213,65,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,100,Electric,Water,Steel,Psychic,292,225,67,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,100,Electric,Water,Steel,Psychic,306,237,69,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,110,Electric,Water,Steel,Psychic,250,192,58,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,110,Electric,Water,Steel,Psychic,264,204,60,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,110,Electric,Water,Steel,Psychic,278,216,62,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,120,Electric,Water,Steel,Psychic,292,238,54,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,120,Electric,Water,Steel,Psychic,306,250,56,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,84,100,120,Electric,Water,Steel,Psychic,250,192,58,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,80,Electric,Water,Steel,Psychic,264,174,90,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,80,Electric,Water,Steel,Psychic,278,185,93,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,80,Electric,Water,Steel,Psychic,292,196,96,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,90,Electric,Water,Steel,Psychic,306,226,80,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,90,Electric,Water,Steel,Psychic,250,167,83,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,90,Electric,Water,Steel,Psychic,264,179,85,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,100,Electric,Water,Steel,Psychic,278,206,72,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,100,Electric,Water,Steel,Psychic,292,217,75,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,100,Electric,Water,Steel,Psychic,306,229,77,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,110,Electric,Water,Steel,Psychic,250,184,66,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,110,Electric,Water,Steel,Psychic,264,196,68,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,110,Electric,Water,Steel,Psychic,278,208,70,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,120,Electric,Water,Steel,Psychic,292,231,61,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,120,Electric,Water,Steel,Psychic,306,243,63,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,94,100,120,Electric,Water,Steel,Psychic,250,185,65,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,80,Electric,Water,Steel,Psychic,264,164,100,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,80,Electric,Water,Steel,Psychic,278,174,104,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,80,Electric,Water,Steel,Psychic,292,185,107,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,90,Electric,Water,Steel,Psychic,306,217,89,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,90,Electric,Water,Steel,Psychic,250,158,92,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,90,Electric,Water,Steel,Psychic,264,169,95,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,100,Electric,Water,Steel,Psychic,278,198,80,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,100,Electric,Water,Steel,Psychic,292,209,83,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,100,Electric,Water,Steel,Psychic,306,221,85,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,110,Electric,Water,Steel,Psychic,250,177,73,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,110,Electric,Water,Steel,Psychic,264,188,76,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,110,Electric,Water,Steel,Psychic,278,199,79,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,120,Electric,Water,Steel,Psychic,292,225,67,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,120,Electric,Water,Steel,Psychic,306,237,69,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,105,100,120,Electric,Water,Steel,Psychic,250,178,72,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,80,Electric,Water,Steel,Psychic,264,154,110,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,80,Electric,Water,Steel,Psychic,278,164,114,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,80,Electric,Water,Steel,Psychic,292,174,118,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,90,Electric,Water,Steel,Psychic,306,208,98,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,90,Electric,Water,Steel,Psychic,250,149,101,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,90,Electric,Water,Steel,Psychic,264,159,105,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,100,Electric,Water,Steel,Psychic,278,189,89,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,100,Electric,Water,Steel,Psychic,292,200,92,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,100,Electric,Water,Steel,Psychic,306,211,95,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,110,Electric,Water,Steel,Psychic,250,169,81,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,110,Electric,Water,Steel,Psychic,264,180,84,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,110,Electric,Water,Steel,Psychic,278,191,87,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,120,Electric,Water,Steel,Psychic,292,219,73,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,120,Electric,Water,Steel,Psychic,306,230,76,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,116,100,120,Electric,Water,Steel,Psychic,250,171,79,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,80,Electric,Water,Steel,Psychic,264,145,119,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,80,Electric,Water,Steel,Psychic,278,154,124,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,80,Electric,Water,Steel,Psychic,292,164,128,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,90,Electric,Water,Steel,Psychic,306,199,107,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,90,Electric,Water,Steel,Psychic,250,140,110,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,90,Electric,Water,Steel,Psychic,264,150,114,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,100,Electric,Water,Steel,Psychic,278,182,96,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,100,Electric,Water,Steel,Psychic,292,192,100,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,100,Electric,Water,Steel,Psychic,306,203,103,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,110,Electric,Water,Steel,Psychic,250,163,87,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,110,Electric,Water,Steel,Psychic,264,173,91,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,110,Electric,Water,Steel,Psychic,278,184,94,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,120,Electric,Water,Steel,Psychic,292,212,80,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,120,Electric,Water,Steel,Psychic,306,223,83,normal
+smogtours-gen5ou-59402_aug,3,Rotom-Wash,Jirachi,Volt Switch,70,Electric,Special,65,126,100,120,Electric,Water,Steel,Psychic,250,165,85,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,76,85,Ground,,Dragon,Ground,399,271,128,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,76,85,Ground,,Dragon,Ground,420,287,133,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,76,85,Ground,,Dragon,Ground,441,304,137,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,86,85,Ground,,Dragon,Ground,462,349,113,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,86,85,Ground,,Dragon,Ground,378,261,117,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,86,85,Ground,,Dragon,Ground,399,278,121,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,95,85,Ground,,Dragon,Ground,420,317,103,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,95,85,Ground,,Dragon,Ground,441,335,106,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,95,85,Ground,,Dragon,Ground,462,352,110,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,105,85,Ground,,Dragon,Ground,378,284,94,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,105,85,Ground,,Dragon,Ground,399,302,97,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,105,85,Ground,,Dragon,Ground,420,319,101,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,114,85,Ground,,Dragon,Ground,441,355,86,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,114,85,Ground,,Dragon,Ground,462,373,89,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,90,68,114,85,Ground,,Dragon,Ground,378,286,92,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,76,85,Ground,,Dragon,Ground,399,255,144,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,76,85,Ground,,Dragon,Ground,420,271,149,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,76,85,Ground,,Dragon,Ground,441,287,154,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,86,85,Ground,,Dragon,Ground,462,335,127,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,86,85,Ground,,Dragon,Ground,378,246,132,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,86,85,Ground,,Dragon,Ground,399,263,136,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,95,85,Ground,,Dragon,Ground,420,304,116,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,95,85,Ground,,Dragon,Ground,441,321,120,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,95,85,Ground,,Dragon,Ground,462,338,124,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,105,85,Ground,,Dragon,Ground,378,274,104,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,105,85,Ground,,Dragon,Ground,399,291,108,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,105,85,Ground,,Dragon,Ground,420,309,111,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,114,85,Ground,,Dragon,Ground,441,345,96,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,114,85,Ground,,Dragon,Ground,462,362,100,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,101,68,114,85,Ground,,Dragon,Ground,378,275,103,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,76,85,Ground,,Dragon,Ground,399,240,159,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,76,85,Ground,,Dragon,Ground,420,255,165,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,76,85,Ground,,Dragon,Ground,441,271,170,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,86,85,Ground,,Dragon,Ground,462,321,141,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,86,85,Ground,,Dragon,Ground,378,232,146,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,86,85,Ground,,Dragon,Ground,399,248,151,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,95,85,Ground,,Dragon,Ground,420,292,128,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,95,85,Ground,,Dragon,Ground,441,308,133,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,95,85,Ground,,Dragon,Ground,462,325,137,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,105,85,Ground,,Dragon,Ground,378,262,116,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,105,85,Ground,,Dragon,Ground,399,279,120,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,105,85,Ground,,Dragon,Ground,420,296,124,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,114,85,Ground,,Dragon,Ground,441,334,107,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,114,85,Ground,,Dragon,Ground,462,352,110,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,112,68,114,85,Ground,,Dragon,Ground,378,264,114,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,76,85,Ground,,Dragon,Ground,399,225,174,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,76,85,Ground,,Dragon,Ground,420,240,180,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,76,85,Ground,,Dragon,Ground,441,254,187,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,86,85,Ground,,Dragon,Ground,462,307,155,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,86,85,Ground,,Dragon,Ground,378,217,161,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,86,85,Ground,,Dragon,Ground,399,233,166,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,95,85,Ground,,Dragon,Ground,420,280,140,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,95,85,Ground,,Dragon,Ground,441,296,145,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,95,85,Ground,,Dragon,Ground,462,312,150,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,105,85,Ground,,Dragon,Ground,378,251,127,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,105,85,Ground,,Dragon,Ground,399,267,132,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,105,85,Ground,,Dragon,Ground,420,284,136,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,114,85,Ground,,Dragon,Ground,441,324,117,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,114,85,Ground,,Dragon,Ground,462,341,121,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,123,68,114,85,Ground,,Dragon,Ground,378,253,125,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,76,85,Ground,,Dragon,Ground,399,208,191,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,76,85,Ground,,Dragon,Ground,420,222,198,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,76,85,Ground,,Dragon,Ground,441,237,204,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,86,85,Ground,,Dragon,Ground,462,294,168,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,86,85,Ground,,Dragon,Ground,378,204,174,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,86,85,Ground,,Dragon,Ground,399,219,180,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,95,85,Ground,,Dragon,Ground,420,267,153,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,95,85,Ground,,Dragon,Ground,441,283,158,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,95,85,Ground,,Dragon,Ground,462,299,163,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,105,85,Ground,,Dragon,Ground,378,240,138,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,105,85,Ground,,Dragon,Ground,399,256,143,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,105,85,Ground,,Dragon,Ground,420,272,148,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,114,85,Ground,,Dragon,Ground,441,314,127,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,114,85,Ground,,Dragon,Ground,462,330,132,normal
+smogtours-gen5ou-59402_aug,4,Hippowdon,Garchomp,Earthquake,100,Ground,Physical,134,68,114,85,Ground,,Dragon,Ground,378,242,136,normal
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,76,85,Ground,,Dragon,Ground,399,287,112,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,76,85,Ground,,Dragon,Ground,420,304,116,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,76,85,Ground,,Dragon,Ground,441,321,120,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,86,85,Ground,,Dragon,Ground,462,362,100,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,86,85,Ground,,Dragon,Ground,378,275,103,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,86,85,Ground,,Dragon,Ground,399,292,107,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,95,85,Ground,,Dragon,Ground,420,330,90,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,95,85,Ground,,Dragon,Ground,441,348,93,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,95,85,Ground,,Dragon,Ground,462,366,96,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,105,85,Ground,,Dragon,Ground,378,297,81,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,105,85,Ground,,Dragon,Ground,399,315,84,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,105,85,Ground,,Dragon,Ground,420,333,87,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,114,85,Ground,,Dragon,Ground,441,365,76,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,114,85,Ground,,Dragon,Ground,462,383,79,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,90,68,114,85,Ground,,Dragon,Ground,378,297,81,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,76,85,Ground,,Dragon,Ground,399,274,125,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,76,85,Ground,,Dragon,Ground,420,290,130,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,76,85,Ground,,Dragon,Ground,441,307,134,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,86,85,Ground,,Dragon,Ground,462,350,112,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,86,85,Ground,,Dragon,Ground,378,262,116,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,86,85,Ground,,Dragon,Ground,399,279,120,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,95,85,Ground,,Dragon,Ground,420,318,102,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,95,85,Ground,,Dragon,Ground,441,336,105,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,95,85,Ground,,Dragon,Ground,462,353,109,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,105,85,Ground,,Dragon,Ground,378,287,91,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,105,85,Ground,,Dragon,Ground,399,304,95,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,105,85,Ground,,Dragon,Ground,420,322,98,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,114,85,Ground,,Dragon,Ground,441,356,85,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,114,85,Ground,,Dragon,Ground,462,374,88,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,101,68,114,85,Ground,,Dragon,Ground,378,287,91,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,76,85,Ground,,Dragon,Ground,399,260,139,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,76,85,Ground,,Dragon,Ground,420,276,144,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,76,85,Ground,,Dragon,Ground,441,292,149,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,86,85,Ground,,Dragon,Ground,462,338,124,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,86,85,Ground,,Dragon,Ground,378,250,128,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,86,85,Ground,,Dragon,Ground,399,267,132,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,95,85,Ground,,Dragon,Ground,420,308,112,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,95,85,Ground,,Dragon,Ground,441,325,116,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,95,85,Ground,,Dragon,Ground,462,342,120,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,105,85,Ground,,Dragon,Ground,378,276,102,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,105,85,Ground,,Dragon,Ground,399,294,105,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,105,85,Ground,,Dragon,Ground,420,311,109,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,114,85,Ground,,Dragon,Ground,441,348,93,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,114,85,Ground,,Dragon,Ground,462,366,96,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,112,68,114,85,Ground,,Dragon,Ground,378,278,100,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,76,85,Ground,,Dragon,Ground,399,246,153,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,76,85,Ground,,Dragon,Ground,420,262,158,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,76,85,Ground,,Dragon,Ground,441,278,163,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,86,85,Ground,,Dragon,Ground,462,326,136,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,86,85,Ground,,Dragon,Ground,378,238,140,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,86,85,Ground,,Dragon,Ground,399,254,145,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,95,85,Ground,,Dragon,Ground,420,298,122,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,95,85,Ground,,Dragon,Ground,441,315,126,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,95,85,Ground,,Dragon,Ground,462,331,131,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,105,85,Ground,,Dragon,Ground,378,268,110,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,105,85,Ground,,Dragon,Ground,399,285,114,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,105,85,Ground,,Dragon,Ground,420,302,118,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,114,85,Ground,,Dragon,Ground,441,339,102,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,114,85,Ground,,Dragon,Ground,462,357,105,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,123,68,114,85,Ground,,Dragon,Ground,378,269,109,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,76,85,Ground,,Dragon,Ground,399,233,166,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,76,85,Ground,,Dragon,Ground,420,248,172,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,76,85,Ground,,Dragon,Ground,441,263,178,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,86,85,Ground,,Dragon,Ground,462,315,147,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,86,85,Ground,,Dragon,Ground,378,225,153,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,86,85,Ground,,Dragon,Ground,399,241,158,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,95,85,Ground,,Dragon,Ground,420,286,134,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,95,85,Ground,,Dragon,Ground,441,302,139,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,95,85,Ground,,Dragon,Ground,462,319,143,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,105,85,Ground,,Dragon,Ground,378,258,120,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,105,85,Ground,,Dragon,Ground,399,275,124,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,105,85,Ground,,Dragon,Ground,420,291,129,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,114,85,Ground,,Dragon,Ground,441,329,112,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,114,85,Ground,,Dragon,Ground,462,346,116,super_effective
+smogtours-gen5ou-59402_aug,5,Hippowdon,Garchomp,Ice Fang,65,Ice,Physical,134,68,114,85,Ground,,Dragon,Ground,378,258,120,super_effective
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,60,100,Ground,,Water,,269,106,163,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,60,100,Ground,,Water,,283,115,168,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,60,100,Ground,,Water,,297,123,174,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,68,100,Ground,,Water,,311,167,144,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,68,100,Ground,,Water,,255,106,149,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,68,100,Ground,,Water,,269,115,154,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,75,100,Ground,,Water,,283,153,130,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,75,100,Ground,,Water,,297,163,134,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,75,100,Ground,,Water,,311,172,139,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,82,100,Ground,,Water,,255,136,119,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,82,100,Ground,,Water,,269,145,124,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,82,100,Ground,,Water,,283,155,128,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,90,100,Ground,,Water,,297,188,109,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,90,100,Ground,,Water,,311,198,113,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,90,68,90,100,Ground,,Water,,255,138,117,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,60,100,Ground,,Water,,269,87,182,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,60,100,Ground,,Water,,283,95,188,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,60,100,Ground,,Water,,297,102,195,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,68,100,Ground,,Water,,311,151,160,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,68,100,Ground,,Water,,255,89,166,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,68,100,Ground,,Water,,269,98,171,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,75,100,Ground,,Water,,283,137,146,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,75,100,Ground,,Water,,297,146,151,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,75,100,Ground,,Water,,311,155,156,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,82,100,Ground,,Water,,255,122,133,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,82,100,Ground,,Water,,269,131,138,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,82,100,Ground,,Water,,283,140,143,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,90,100,Ground,,Water,,297,175,122,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,90,100,Ground,,Water,,311,185,126,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,101,68,90,100,Ground,,Water,,255,124,131,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,60,100,Ground,,Water,,269,68,201,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,60,100,Ground,,Water,,283,75,208,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,60,100,Ground,,Water,,297,82,215,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,68,100,Ground,,Water,,311,133,178,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,68,100,Ground,,Water,,255,71,184,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,68,100,Ground,,Water,,269,78,191,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,75,100,Ground,,Water,,283,122,161,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,75,100,Ground,,Water,,297,130,167,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,75,100,Ground,,Water,,311,138,173,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,82,100,Ground,,Water,,255,108,147,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,82,100,Ground,,Water,,269,116,153,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,82,100,Ground,,Water,,283,125,158,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,90,100,Ground,,Water,,297,162,135,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,90,100,Ground,,Water,,311,172,139,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,112,68,90,100,Ground,,Water,,255,111,144,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,60,100,Ground,,Water,,269,48,221,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,60,100,Ground,,Water,,283,54,229,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,60,100,Ground,,Water,,297,60,237,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,68,100,Ground,,Water,,311,116,195,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,68,100,Ground,,Water,,255,54,201,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,68,100,Ground,,Water,,269,61,208,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,75,100,Ground,,Water,,283,106,177,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,75,100,Ground,,Water,,297,114,183,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,75,100,Ground,,Water,,311,122,189,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,82,100,Ground,,Water,,255,92,163,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,82,100,Ground,,Water,,269,101,168,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,82,100,Ground,,Water,,283,109,174,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,90,100,Ground,,Water,,297,150,147,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,90,100,Ground,,Water,,311,158,153,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,123,68,90,100,Ground,,Water,,255,97,158,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,60,100,Ground,,Water,,269,29,240,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,60,100,Ground,,Water,,283,34,249,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,60,100,Ground,,Water,,297,40,257,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,68,100,Ground,,Water,,311,99,212,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,68,100,Ground,,Water,,255,35,220,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,68,100,Ground,,Water,,269,42,227,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,75,100,Ground,,Water,,283,90,193,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,75,100,Ground,,Water,,297,97,200,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,75,100,Ground,,Water,,311,104,207,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,82,100,Ground,,Water,,255,78,177,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,82,100,Ground,,Water,,269,86,183,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,82,100,Ground,,Water,,283,94,189,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,90,100,Ground,,Water,,297,136,161,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,90,100,Ground,,Water,,311,144,167,normal
+smogtours-gen5ou-59402_aug,7,Hippowdon,Politoed,Earthquake,100,Ground,Physical,134,68,90,100,Ground,,Water,,255,82,173,normal
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,86,Water,,Electric,Water,226,190,36,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,86,Water,,Electric,Water,238,200,38,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,86,Water,,Electric,Water,250,211,39,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,96,Water,,Electric,Water,262,229,33,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,96,Water,,Electric,Water,214,180,34,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,96,Water,,Electric,Water,226,191,35,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,107,Water,,Electric,Water,238,209,29,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,107,Water,,Electric,Water,250,219,31,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,107,Water,,Electric,Water,262,230,32,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,118,Water,,Electric,Water,214,187,27,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,118,Water,,Electric,Water,226,198,28,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,118,Water,,Electric,Water,238,209,29,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,128,Water,,Electric,Water,250,226,24,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,128,Water,,Electric,Water,262,237,25,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,72,107,128,Water,,Electric,Water,214,188,26,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,86,Water,,Electric,Water,226,185,41,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,86,Water,,Electric,Water,238,196,42,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,86,Water,,Electric,Water,250,206,44,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,96,Water,,Electric,Water,262,226,36,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,96,Water,,Electric,Water,214,176,38,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,96,Water,,Electric,Water,226,187,39,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,107,Water,,Electric,Water,238,205,33,resisted
+smogtours-gen5ou-59402_aug,8,Politoed,Rotom-Wash,Scald,80,Water,Special,75,81,107,107,Water,,Electric,Water,250,216,34,resisted

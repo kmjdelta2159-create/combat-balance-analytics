@@ -1,0 +1,125 @@
+{
+  "battle": {
+    "battle_id": "smogtours-gen5ou-59402",
+    "title": "[Gen 5] OU replay: Reymedy vs. Leftiez~",
+    "gametype": "singles",
+    "gen": "5",
+    "tier": "[Gen 5] OU",
+    "winner": "Reymedy",
+    "total_turns": 27
+  },
+  "players": [
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "username": "Reymedy",
+      "avatar": "#reymedy"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p2",
+      "username": "Leftiez~",
+      "avatar": "#leftiez"
+    }
+  ],
+  "team_pokemon": [
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "slot_index": 1,
+      "pokemon_raw": "Politoed, M",
+      "species": "Politoed",
+      "gender": "M"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "slot_index": 2,
+      "pokemon_raw": "Jirachi",
+      "species": "Jirachi",
+      "gender": null
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "slot_index": 3,
+      "pokemon_raw": "Breloom, F",
+      "species": "Breloom",
+      "gender": "F"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "slot_index": 4,
+      "pokemon_raw": "Garchomp, M",
+      "species": "Garchomp",
+      "gender": "M"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "slot_index": 5,
+      "pokemon_raw": "Zapdos",
+      "species": "Zapdos",
+      "gender": null
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p1",
+      "slot_index": 6,
+      "pokemon_raw": "Tentacruel, M",
+      "species": "Tentacruel",
+      "gender": "M"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p2",
+      "slot_index": 1,
+      "pokemon_raw": "Stoutland, F",
+      "species": "Stoutland",
+      "gender": "F"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p2",
+      "slot_index": 2,
+      "pokemon_raw": "Hippowdon, F",
+      "species": "Hippowdon",
+      "gender": "F"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p2",
+      "slot_index": 3,
+      "pokemon_raw": "Rotom-Wash",
+      "species": "Rotom-Wash",
+      "gender": null
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p2",
+      "slot_index": 4,
+      "pokemon_raw": "Ferrothorn, F",
+      "species": "Ferrothorn",
+      "gender": "F"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p2",
+      "slot_index": 5,
+      "pokemon_raw": "Latios, M",
+      "species": "Latios",
+      "gender": "M"
+    },
+    {
+      "battle_id": "smogtours-gen5ou-59402",
+      "side": "p2",
+      "slot_index": 6,
+      "pokemon_raw": "Metagross",
+      "species": "Metagross",
+      "gender": null
+    }
+  ],
+  "event_count": 343,
+  "source_file": "Gen5OU-2015-05-11-reymedy-leftiez.html"
+}

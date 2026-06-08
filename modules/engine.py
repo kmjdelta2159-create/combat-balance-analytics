@@ -1570,8 +1570,53 @@ def _worker_simulate_match(args):
         state_cfg = (game_config or {}).get("_state_score_config") or {}
         actual_state = {}
 
+        observed_status_trace = (game_config or {}).get("_observed_status_trace") or []
+        observed_hp_trace = (game_config or {}).get("_observed_hp_trace") or []
+
+        def _apply_traces(ctx):
+            turn = ctx.get("turn")
+            
+            if observed_hp_trace:
+                for evt in observed_hp_trace:
+                    if evt.get("turn") == turn:
+                        pid = evt.get("entity_id")
+                        for p in ctx["participants"]:
+                            if str(p.get("id")) == str(pid):
+                                hp = evt.get("hp")
+                                hp_max = evt.get("hp_max")
+                                is_faint = evt.get("fainted")
+                                
+                                res = p.setdefault("resources", {})
+                                hp_res = res.setdefault("HP", {})
+                                
+                                if hp is not None:
+                                    hp_res["current"] = hp
+                                if hp_max is not None:
+                                    hp_res["max"] = hp_max
+                                    
+                                if is_faint:
+                                    if hp_res.get("current", 1.0) > 0:
+                                        hp_res["current"] = 0.0
+                                break
+
+            if observed_status_trace:
+                for evt in observed_status_trace:
+                    if evt.get("turn") == turn:
+                        pid = evt.get("entity_id")
+                        op = evt.get("op")
+                        status_val = evt.get("status")
+                        
+                        for p in ctx["participants"]:
+                            if str(p.get("id")) == str(pid):
+                                if op == "apply":
+                                    p["status"] = status_val
+                                elif op == "clear":
+                                    p["status"] = ""
+                                break
+
         def _capture_state(ctx):
-            actual_state[ctx.get("turn")] = _snapshot_for_worker(
+            turn = ctx.get("turn")
+            actual_state[turn] = _snapshot_for_worker(
                 ctx["participants"],
                 hp_mode=state_cfg.get("hp_mode", "absolute"),
                 resource_names=state_cfg.get("resource_names") or [],
@@ -1641,7 +1686,7 @@ def _worker_simulate_match(args):
             resource_module=resource_module,
             spatial_module=spatial_module, range_stat=range_stat, move_stat=move_stat,
             deck_module=deck_module, game_config=game_config,
-            on_turn_end=cb, on_phase_event=phase_cb
+            on_turn_end=cb, on_action_end=(_apply_traces if expected_state else None), on_phase_event=phase_cb
         )
         
         if expected_state:
@@ -1738,7 +1783,7 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
                    resource_module=None,
                    spatial_module=None, range_stat=None,
                    move_stat=None, deck_module=None, game_config=None, on_turn_end=None,
-                   on_round_start=None, on_phase_event=None):
+                   on_round_start=None, on_phase_event=None, on_action_end=None):
     logs = []
     def add_log(msg): 
         if not silent: logs.append(msg)
@@ -2011,11 +2056,13 @@ def run_simulation(ally_instances, enemy_instances, max_turns=100,
             return 0
 
     _btn = _broadcast_phase_event
-    if on_turn_end is not None:
+    if on_turn_end is not None or on_action_end is not None:
         def _btn(_pk, _ctx, _targets=None, _orig=_broadcast_phase_event, 
-                 _turn_cb=on_turn_end):
+                 _turn_cb=on_turn_end, _action_cb=on_action_end):
             _orig(_pk, _ctx, _targets)
-            if _pk == "TURN_END":
+            if _pk == "ACTION_END" and _action_cb is not None:
+                _action_cb(_ctx)
+            if _pk == "TURN_END" and _turn_cb is not None:
                 _turn_cb(_ctx)
     manager = TurnManagerCls(
         action_registry=registry,

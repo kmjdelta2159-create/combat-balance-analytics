@@ -1,0 +1,25 @@
+roster_id,battle_id,side,slot_index,species,gender,raw_pokemon_text
+smogtours-gen5ou-59402:p1:01,smogtours-gen5ou-59402,p1,1,Politoed,M,"Politoed, M"
+smogtours-gen5ou-59402:p1:02,smogtours-gen5ou-59402,p1,2,Jirachi,,Jirachi
+smogtours-gen5ou-59402:p1:03,smogtours-gen5ou-59402,p1,3,Breloom,F,"Breloom, F"
+smogtours-gen5ou-59402:p1:04,smogtours-gen5ou-59402,p1,4,Garchomp,M,"Garchomp, M"
+smogtours-gen5ou-59402:p1:05,smogtours-gen5ou-59402,p1,5,Zapdos,,Zapdos
+smogtours-gen5ou-59402:p1:06,smogtours-gen5ou-59402,p1,6,Tentacruel,M,"Tentacruel, M"
+smogtours-gen5ou-59402:p2:01,smogtours-gen5ou-59402,p2,1,Stoutland,F,"Stoutland, F"
+smogtours-gen5ou-59402:p2:02,smogtours-gen5ou-59402,p2,2,Hippowdon,F,"Hippowdon, F"
+smogtours-gen5ou-59402:p2:03,smogtours-gen5ou-59402,p2,3,Rotom-Wash,,Rotom-Wash
+smogtours-gen5ou-59402:p2:04,smogtours-gen5ou-59402,p2,4,Ferrothorn,F,"Ferrothorn, F"
+smogtours-gen5ou-59402:p2:05,smogtours-gen5ou-59402,p2,5,Latios,M,"Latios, M"
+smogtours-gen5ou-59402:p2:06,smogtours-gen5ou-59402,p2,6,Metagross,,Metagross
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p1:01,smogtours-gen5ou-59402_copy,p1,1,Politoed,M,"Politoed, M"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p1:02,smogtours-gen5ou-59402_copy,p1,2,Jirachi,,Jirachi
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p1:03,smogtours-gen5ou-59402_copy,p1,3,Breloom,F,"Breloom, F"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p1:04,smogtours-gen5ou-59402_copy,p1,4,Garchomp,M,"Garchomp, M"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p1:05,smogtours-gen5ou-59402_copy,p1,5,Zapdos,,Zapdos
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p1:06,smogtours-gen5ou-59402_copy,p1,6,Tentacruel,M,"Tentacruel, M"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p2:01,smogtours-gen5ou-59402_copy,p2,1,Stoutland,F,"Stoutland, F"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p2:02,smogtours-gen5ou-59402_copy,p2,2,Hippowdon,F,"Hippowdon, F"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p2:03,smogtours-gen5ou-59402_copy,p2,3,Rotom-Wash,,Rotom-Wash
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p2:04,smogtours-gen5ou-59402_copy,p2,4,Ferrothorn,F,"Ferrothorn, F"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p2:05,smogtours-gen5ou-59402_copy,p2,5,Latios,M,"Latios, M"
+smogtours-gen5ou-59402:p2:06smogtours-gen5ou-59402:p2:06,smogtours-gen5ou-59402_copy,p2,6,Metagross,,Metagross
